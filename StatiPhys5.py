@@ -42,6 +42,22 @@ def marginal_probability_distribution(events : list):
     Naturally, the converse is also true: the marginal distribution can be obtained for Y by summing over the separate values of X.
 
     $$ p_{X}(x_{i})=\sum _{j}p(x_{i},y_{j}),\quad {\text{and}}\quad p_{Y}(y_{j})=\sum _{i}p(x_{i},y_{j}) $$
+    
+    Let us consider the following probability table for the joint distribution of random variables X
+    and Y:
+
+            Row Y = 1 : 1/8, 1/16, 1/32, 1/32
+            Row Y = 2 : 1/16, 1/8, 1/32, 1/32
+            Row Y = 3 : 1/16, 1/16, 1/16, 1/16
+            Row y = 4 : 1/4, 0, 0, 0
+    
+    for the x-events would be the values in the columns, hence first x-events px(1) and analog for py(1) would be:
+        
+        ```
+        px(1) = 1/8, 1/16, 1/16, 1/4
+        py(1) = 1/8, 1/16, 1/32, 1/32
+        ```
+
 
     Args:
         events (list): list of events
@@ -60,4 +76,48 @@ print("px(i) = ", px)
 print("py(i) = ", py)
 
 
-# [conditional probability distribution]______________________________________________________________
+# [conditional probability distribution]_____________________________________________
+
+def conditional_probability_distribution(events: list, marginal_events: list):
+    """
+    Given two jointly distributed random variables X and Y, the conditional probability distribution of Y given X is the probability distribution of Y when X is known to be a particular value; in some cases the conditional probabilities may be expressed as functions containing the unspecified value x of X as a parameter. 
+    When both X and Y are categorical variables, a conditional probability table is typically used to represent the conditional probability. The conditional distribution contrasts with the marginal distribution of a random variable, which is its distribution without reference to the value of the other variable.
+
+    Let us consider the following probability table for the joint distribution of random variables X
+    and Y:
+
+        Row Y = 1 : 1/8, 1/16, 1/32, 1/32
+        Row Y = 2 : 1/16, 1/8, 1/32, 1/32
+        Row Y = 3 : 1/16, 1/16, 1/16, 1/16
+        Row y = 4 : 1/4, 0, 0, 0
+    
+    for the x-events would be the values in the columns, hence first x-events px(1) and analog for py(1) would be:
+        
+        ```
+        px(1) = 1/8, 1/16, 1/16, 1/4
+        py(1) = 1/8, 1/16, 1/32, 1/32
+        ```
+
+    Args:
+        events (list): list of events
+        marginal_events (list): calculated marginalevents for X or Y
+
+    Returns:
+        List: a list with the conditional probability distribution of i base on j (analog for j on i)
+    """
+    
+    p_ij = []
+    for i in range(len(events)):
+        quote = [float(j/marginal_events[i]) for _,j in enumerate(events[i])]
+        p_ij.append(quote)
+    
+    return np.array(p_ij)
+
+p_ij = conditional_probability_distribution(x_events, px)
+p_ji = conditional_probability_distribution(y_events, py)
+
+print("p(i|j) = ", p_ij)
+print("p(j|i) = ", p_ji)
+
+
+# [H(X), H(Y), H(X|Y), H(Y|X), H(X,Y) and I(X; Y)]__________________________________________________________
