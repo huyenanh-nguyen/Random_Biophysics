@@ -60,7 +60,7 @@ def marginal_probability_distribution(events : list):
 
 
     Args:
-        events (list): list of events
+        events (array_like): list of events
     
     Returns:
         List: a list with the sum of each events of a joint distribution
@@ -99,8 +99,8 @@ def conditional_probability_distribution(events: list, marginal_events: list):
         ```
 
     Args:
-        events (list): list of events
-        marginal_events (list): calculated marginalevents for X or Y
+        events (array_like): list of events
+        marginal_events (array_like): calculated marginalevents for X or Y
 
     Returns:
         List: a list with the conditional probability distribution of i base on j (analog for j on i)
@@ -121,3 +121,33 @@ print("p(j|i) = ", p_ji)
 
 
 # [H(X), H(Y), H(X|Y), H(Y|X), H(X,Y) and I(X; Y)]__________________________________________________________
+
+def shannon_entropy(probability):
+    """
+    The gain in information when measuring x and y equals the gain of information
+    when measuring only x plus the gain of information when measuring y under
+    the condition that x is known.
+    x causes y to a certain extent, if the events are not completely independent.
+    It also follows from the previous that
+    H(x)+ H(y) ≥ H(x,y) = H(x) + H(y|x)
+
+    Shannon Entropy is in bits (log base 2)
+
+    Args:
+        probability (array_like): array of the probability table for the joint distribution of random variables X and Y:
+
+    Returns:
+        float: return shannon entropy in bits
+    """
+
+    joint = -np.sum(probability * np.log2(probability, where=(probability > 0)))
+    return joint
+
+
+
+print("H(X,Y) = ", shannon_entropy(joint_distribution)) 
+print("H(X) = ",shannon_entropy(np.array(px)))
+print("H(Y) = ",shannon_entropy(np.array(py)))
+print("H(X|Y) = ", shannon_entropy(joint_distribution) - shannon_entropy(np.array(py)))
+print("H(Y|X) = ", shannon_entropy(joint_distribution) - shannon_entropy(np.array(px)))
+print("I(X;Y) = ", shannon_entropy(np.array(px)) - (shannon_entropy(joint_distribution) - shannon_entropy(np.array(py))))
