@@ -1,0 +1,37 @@
+// first_cell_hoc_graph.hoc
+create soma
+access soma
+
+soma {
+    L = 20
+    diam = 20
+    insert hh
+}
+
+objref stim
+stim = new IClamp(0.5)
+stim.del = 5
+stim.dur = 1
+stim.amp = 0.1
+
+tstop = 40
+v_init = -65
+
+// Aufzeichnung
+objref vvec, tvec
+vvec = new Vector()
+tvec = new Vector()
+vvec.record(&soma.v(0.5))
+tvec.record(&t)
+
+// NEURON GUI Graph erzeugen
+objref g
+g = new Graph()
+g.size(0, tstop, -80, 50)
+g.addvar("soma(0.5).v", &soma.v(0.5))
+
+// Achsenbeschriftung über Graph Menu (nur GUI):
+// Im NEURON Fenster: Graph → Labels → "Time (ms)", "Voltage (mV)"
+// HOC kann das direkt nicht setzen
+
+run()
