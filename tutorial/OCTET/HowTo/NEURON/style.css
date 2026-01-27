@@ -1,0 +1,36 @@
+h2{
+    color:burlywood;
+}
+.hoc {
+	color: #009900;
+}
+.do {
+	background-color: #99FFFF;
+}
+.cl {
+	font-style: oblique;
+	color: #660000;
+}
+.NMODL {
+	color: #000099;
+}
+.box {
+	padding: 5px;
+	margin-top: 3px;
+	margin-right: 3px;
+	margin-bottom: 3px;
+	margin-left: 3px;
+	border: 5px dotted #660000;
+}
+.note {
+	font-size: x-small;
+	font-style: italic;
+	text-transform: lowercase;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+.GUIbutton {
+	margin: 1px;
+	padding: 1px;
+	width: 2px;
+	border: thin solid #000099;
+}

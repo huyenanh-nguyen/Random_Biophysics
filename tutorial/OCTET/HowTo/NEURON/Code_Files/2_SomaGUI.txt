@@ -1,0 +1,48 @@
+//To run this file using , change the .txt in the filename 
+//to .hoc and then double click on the icon
+
+//every line starting with a double backslash is a comment and not 
+//actually part of the code
+
+// loads the tools to access the model parameters through the GUI interface
+load_file("nrngui.hoc") 
+
+//create a soma variable holder
+create soma 
+
+//set the soma cable section as the default section
+access soma 
+
+//set parameters for soma section
+soma nseg=1
+soma diam=18.8
+soma L = 18.8
+soma Ra=100.0
+
+//add predefined channel parameters called 
+//hh - Hodgkin Huxley and pas - passive potassium and sodium
+insert hh
+insert pas
+
+//create an empty object variable called electrode
+objectvar electrode
+
+//set the electrode to be a predefined object - IClamp
+//place the object in the center (0.5) of the soma
+soma electrode = new IClamp(0.5)
+
+//set the parameters for the IClamp object
+soma electrode.del=100 //delay before current is passed 
+soma electrode.dur=100 //duration of current pulse
+soma electrode.amp = 0.45 //amplitude of current pulse
+
+
+//print the voltage at the some at the end of the simulation
+print soma.v
+
+
+//Run the simulation for 300 timesteps (ms) 
+tstop = 300
+
+//print all information about all sections 
+forall psection() 

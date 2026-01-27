@@ -1,0 +1,11 @@
+objref gr, gl
+gr = new Graph()
+
+
+gl = new Glyph()
+gl.circle(0,0,1)
+gl.fill(3)
+gl.s(2, 3)
+
+
+gr.glyph(gl, 150, 100, 30, 60, PI/4*DEG)

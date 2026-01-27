@@ -1,0 +1,26 @@
+      page {width: 100% !important; height: 100% !important }
+      div.box { border-style: double; 
+                padding-left: 6pt; 
+                padding-top:  6pt;
+                padding-right: 6pt;
+                padding-bottom: 6pt }
+      .do { background: lightblue; padding: 2px } 
+      .do-hoc { background: lightblue; color: green; padding: 2px } 
+      .hoc { color: green } 
+		  var { font-style: oblique }
+	 		tt.hoc { color: black }
+      .do-sys { background: lightblue; color: maroon; padding: 2px } 
+      .sys { color: maroon } 
+      .do-nmodl { background: lightblue; color: navy; padding: 2px} 
+	    .nmodl { color: navy} 
+      i.name { font-style: oblique }
+      p.ref {text-indent: -3em; margin-left: 3em}
+      body { font-size: 12pt; background: white }
+      sup {font-size: 64%}
+      div.c2 {text-align: center}
+      div.c1 {font-weight: bold; text-align: center}
+			dt {font-weight: bold}
+			img { margin-right: 10px; margin-left: 10px }
+
+			
+	

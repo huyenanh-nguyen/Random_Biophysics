@@ -1,0 +1,143 @@
+body {color:black;
+	font-family: Geneva, Arial, Helvetica, sans-serif; 
+	font-size: 12px; 
+	font-style: normal; 
+	background-color:white; 
+	margin-top: 0px; 
+	margin-right: 5px; 
+	margin-bottom: 5px; 
+	margin-left: 0px; 
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+}
+	
+p { font-family: Geneva, Arial, Helvetica, san-serif;
+	font-size:12px; 
+	color:black;
+	margin-left:3px;}
+
+h1	{font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:24px;
+	color:beige;
+	background:black;
+	text-align:left;
+	text-transform: capitalize;
+	text-weight:600;
+    }
+h2	{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:20px;
+	color:beige;
+	background:black;
+	text-align:center;
+	text-transform: capitalize;
+	text-weight:700;
+	vertical-align: middle;
+    }
+h3
+	{font-family: Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:18px;
+	color:beige;
+	background:#990000 ;
+	text-align:center;
+}
+h4
+	{font-family: Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:16px;
+	color:beige;
+	background:#990000;
+	text-align:center;
+    }
+h5
+	{font-family: Verdana, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:12px;
+	color:#990000;
+	background:beige;
+	text-align:left;
+    }
+	
+h6	{font-family: Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:10px;
+	color:#990000;
+	background:beige;
+	text-align:left;
+    }
+
+
+th {font-family: Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:16px;
+	color:beige;
+	background:gray;
+	text-align:center;
+    }
+
+td {font-family: Arial, Helvetica, sans-serif;
+	font-style:normal;
+	font-size:13px;
+	color:black;
+	background:white;
+	text-align:left;
+    }
+	
+ul
+	{font-family: Arial, Helvetica, sans-serif;
+	list-style-type:circle;
+	background:white;
+	font-size:12px;
+	text-weight:600;
+	background-color:beige;	
+}
+
+ol 
+	{font-family: Arial, Helvetica, sans-serif;
+	background:white;
+	font-size:12px;
+	text-weight:600;
+	background-color:beige;	
+}
+	
+table.Main {border-color:black;
+		padding-left:0px;
+		margin-right:0px;
+		text-align:left;
+		width:550px;
+}
+
+.extra {
+	font-family:"verdana", "Andale mono";
+	font-size:10px;
+	font-style:italic;
+}
+
+
+a:link {
+		background:white;
+		color:maroon;
+		font-style:bold;
+		}
+a:hover {
+		background:silver;
+		color:white;
+		font-style:bold;
+		}
+a:visited{
+		background:white;
+		color:gray;
+		font-style:normal;
+		}
+
+
+		
+dt {
+	font-weight: 600;
+	color: #660000;
+}
+

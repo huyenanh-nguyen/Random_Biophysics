@@ -1,0 +1,166 @@
+//To run this file using , change the .txt in the filename 
+//to .hoc and then double click on the icon
+
+
+// loads the tools to access the model parameters through the GUI interface
+load_file("nrngui.hoc") 
+
+//******START TEMPLATE/FUNCTION******
+
+begintemplate SThcell
+//this will allow the various variables to be accessible outside of the template
+public soma, treeA, treeB 
+
+//create a soma, treeA, treeB variable holders
+create soma, treeA[1], treeB[1]
+
+//creates and object variable called f which will hold the file
+objectvar f
+
+proc init() { local i, me, child1, child2
+
+access soma
+
+//set parameters for soma section
+nseg=1 
+diam=18.8
+L = 18.8
+Ra=123.0 
+
+//add predefined channel parameters called 
+//hh - Hodgkin Huxley and pas - passive potassium and sodium
+insert hh
+gnabar_hh= 0.2
+gl_hh = .0001666 
+el_hh = -60.0
+
+insert pas
+
+f = new File()
+
+//******Defining treeA *******
+f.ropen("treeA.dat") 
+ndendA = f.scanvar() 
+create treeA[ndendA] 
+
+
+    for i = 0,ndendA-1 {
+      
+      me = f.scanvar() - 1
+      child1 = f.scanvar() - 1
+      child2 = f.scanvar() - 1
+
+      treeA[me] {
+        nseg = 1
+     	diam = f.scanvar()
+      	L = f.scanvar()
+      	Ra = 123
+
+	 // initialise and clear the 3D information
+ 	 pt3dclear()
+ 	 pt3dadd(f.scanvar(),f.scanvar(),f.scanvar(),diam)
+  	 pt3dadd(f.scanvar(),f.scanvar(),f.scanvar(),diam)
+      
+  	 insert pas
+ 	 g_pas = .0001666
+ 	 e_pas = -60.0
+    
+      if (child1 >= 0) {
+          printf("connecting tree A dendrite %d (0 end) to parent %d (1 end)\n",child1,me)
+     	  connect treeA[child1](0), 1
+    }
+
+    if (child2 >= 0) {
+		  printf("connecting tree A dendrite %d (0 end) to parent %d (1 end)\n",child2,me)
+          connect treeA[child2](0), 1
+        }
+      }
+    }
+f.close()
+
+//******Defining treeB *******
+f.ropen("treeB.dat") 
+ndendB = f.scanvar() 
+create treeB[ndendB] 
+
+
+    for i = 0,ndendB-1 {
+      
+      me = f.scanvar() - 1
+      child1 = f.scanvar() - 1
+      child2 = f.scanvar() - 1
+
+      treeB[me] {
+      
+	nseg = 1
+     	diam = f.scanvar()
+   	L = f.scanvar()
+   	Ra = 123
+
+      // initialise and clear the 3D information
+      pt3dclear()
+      pt3dadd(f.scanvar(),f.scanvar(),f.scanvar(),diam)
+      pt3dadd(f.scanvar(),f.scanvar(),f.scanvar(),diam)
+      
+      insert pas
+      g_pas = .0001666
+      e_pas = -60.0
+    
+      if (child1 >= 0) {
+     	 printf("connecting tree B dendrite %d (0 end) to parent %d (1 end)\n",child1,me)    
+    	  connect treeB[child1](0), 1
+    	}
+
+    if (child2 >= 0) {
+          connect treeB[child2](0), 1
+        }
+      }
+    }
+f.close()
+
+
+// Connect things together # in parenthesis refer to segment
+connect treeA[0](0), soma(1) 
+connect treeB[0](0), soma(0) 
+
+}
+endtemplate SThcell
+//******END TEMPLATE/FUNCTION*******
+
+
+//tells program to create 4 SThcells
+nSThcells=4
+
+//creates object variables called STHcells[] to hold information about each of 4 cells
+objectvar SThcells[nSThcells]
+
+//adds info to each cell by calling template
+for i=0, nSThcells-1 {
+	SThcells[i]= new SThcell()
+}
+
+//adds and electrode (IClamp(0,5) to the somas of each cell)
+//creates object variable electrode[0-3] to hold information about electrode parameters
+objectvar electrode[nSThcells]
+
+//add info to each electrode in each cell soma
+for i = 0, nSThcells-1 SThcells[i].soma {
+    electrode[i] = new IClamp(0.5)
+    electrode[i].del = 100
+    electrode[i].dur = 100
+    electrode[i].amp = 0.45
+}
+
+//set the soma of STHcells[0] as the default recording point
+access SThcells[0].soma
+
+//print the voltage at the some of cell[0] at the end of the simulation
+print SThcells[0].soma.v
+
+
+//Run the simulation for 300 timesteps (ms) 
+tstop = 300
+
+//print all information about all sections 
+forall psection() 
+

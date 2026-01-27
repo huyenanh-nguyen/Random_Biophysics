@@ -1,0 +1,460 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/HowTo.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Untitled Document</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+    <meta name="generator" content=
+    "HTML Tidy for Linux/x86 (vers 1st February 2002), see www.w3.org">
+
+    
+    <link rel="stylesheet" href="style.css" type="text/css">
+  <!-- InstanceEndEditable -->
+<link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<table width="100%" height="260"  border="0" cellpadding="1" cellspacing="2">
+  <tr>
+    <td width="100" height="1"><img src="../../images/spacer.gif" width="100" height="1"></td>
+    <td height="1"></td>
+  </tr>
+  <tr valign="top">
+    <td width="100"><a href="index.html">Home</a></td>
+    <td></td>
+  </tr>
+  <tr valign="top">
+    <td width="100" height="111"><p><a href="A1_MyFirstNeuon.html" alt = "creating a soma ">A.1</a><br>
+        <a href="A2_GUI.htm">A.2</a><br>
+        <a href="A3_CreateDendrites.html">A.3</a></p>
+    <p><a href="B1_RealismChannels.htm">B.1</a><br>
+      <a href="B2_RealisticMorph.html">B.2</a></p>
+    <p><a href="C1_Templates.html">C.1</a><br>
+      <a href="C2_ConnectingMultiple.html">C.2</a><br>
+      <a href="C3_ViewingMultipleNeurons.htm">C.3
+      </a></p>
+    <p><a href="D1_NMODL.html">D.1</a></p>
+    <p><a href="ColllectDataVectors.html">E.1</a><br>
+      <a href="Speed.htm">E.2</a><br>
+      <a href="PrintingWindows.htm">E.3</a><br>
+      <a href="Sessions.htm">E.4</a><br>
+      E.5<br>
+      <a href="BlockingChannels.htm">E.6</a><br>
+    </p>
+    <p><a href="Commands.htm">Basic <br>
+      Commands</a></p>
+    <p>Manual</p>
+    <p>&nbsp;</p></td>
+  <td><!-- InstanceBeginEditable name="Content" -->
+    <h1>Collecting Data</h1>
+
+    <h2>Introduction</h2>
+
+    <p>We have run a reasonable number of simulations since the
+    first tutorial (<a href="A1_MyFirstNeuon.html">part A</a>). Quite often we
+    will want to analyse or record certain simulation results and
+    perform large numbers of simulations as fast as possible (for
+    example in parameter searching). In this tutorial we will
+    explore methods of getting data out of  to be stored or
+    analysed in other packages. We will also consider ways of
+    speeding up the simulations and the consequences of doing this.</p>
+
+    <h2>Picking Vectors from the Plots</h2>
+
+    <p><img style="float: left" src="images/pickvector3.gif" alt=
+    "PickVector option of the Graph menu" height="385" width="337">
+    Everything that is plotted can be saved to a specified data
+    filename. For example, if we are plotting the voltage of the
+    subthalamic projection  and want to record a particular
+    voltage trace (our example simulations are in
+    <tt>sthE.hoc</tt>), we can do this from the <i>Graph
+    Properties</i> menu. As described in <a href="A3_CreateDendrites.html">part
+    B</a>, this menu appears after a <strong>right click</strong>
+    on the graph of interest.</p>
+
+    <p class="do">From this menu select the <i>Pick Vector</i>
+    option.</p>
+
+    <p>Now any plot on this graph can be selected simply by
+    clicking on the particular plotted line of interest. In our
+    example (left), the graph contains three plots (showing the
+    voltage at the soma of three subthalamic cells). We can only
+    select one plot at a time to save.</p>
+
+    <p class="do">Click on the voltage trace of the third
+    subthalamic cell (the blue plotted line) this will be selected
+    and we can save the associated vectors using the <i class=
+    "name"></i> Main Menu toolbar.</p>
+
+    <p>The Main Menu toolbar (described in <a href="A1_MyFirstNeuon.html">part
+    A</a>) contains a <i>Vector</i> menu allowing vectors to be
+    saved or retrieved from data files.</p>
+
+    <p class="do">Select <i>Save File</i> from the <i>Vector</i>
+    menu.</p>
+
+    <p>This pops up a file dialogue window allowing you to enter a
+    filename for saving the selected vector data. Once you have
+    entered a filename and saved the data it is a good idea to look
+    at the file in a text editor to see how the vectors are saved.
+    The beginning of the file should look something like this:</p>
+<pre>
+
+label:SThcells[2].soma.v( 0.5 )
+32001
+0       -65
+0.025   -65.0488
+0.05    -65.0844
+0.075   -65.1125
+0.1     -65.136
+
+</p>
+
+    <p>The first line of the file is a text string identifying the
+    data being plotted, the second line is the number of data
+    points in the file (here 32001), and finally the third line
+    onward contains the data. Each pair of points is the time and,
+    in our example, soma voltage at that time.</p>
+
+    <h2>Recording Data with Vectors</h2>
+
+    <p>Often it is more convenient to save data without having to
+    plot it first. This can be done in <i class="name">hoc</i>
+    using <i class="name">Vector</i> and <i class="name">File</i>
+    objects. As introduced in <a href="A1_MyFirstNeuon.html">part A</a> we
+    must create an object variable for each object we wish to
+    create. In our example, we want to record both the <b>time</b>
+    and <b>voltage</b> at the soma of the third projection ,
+    so we only require two vector objects (which we will call
+    <tt>rect</tt> and <tt>recv</tt>):</p>
+<p class="do-hoc">
+objref rect, recv
+</p>
+
+    <p>This creates two variables for holding the vector objects.
+    Now the vectors must be created, as we have also seen before,
+    we do this with the <tt>new</tt> command (compare to the
+    creation of the <i class="name">IClamp</i> in <a href=
+    "A1_MyFirstNeuon.html">part A</a>):</p>
+<p class="do-hoc">
+rect = new Vector()
+recv = new Vector()
+</p>
+
+    <p>We now have two vector objects. There are may things we can
+    do with vectors, but all we wish to do here is record the
+    particular time and voltage values of a simulation. If we know
+    the names of the variables in <i class="name">hoc</i> that we
+    wish to save, we can do this with the <i class=
+    "name">record</i> function in the vector object. As described
+    in <a href="C1_Canonical.html">part C</a> our subthalamic cells are
+    defined as an array of object variables (<tt>SThcells[0]</tt>
+    to <tt>SThcells[nSThcells]</tt>). The third cell is
+    <tt>SThcells[2]</tt>. The voltage at the midpoint of the soma
+    is then given by the variable name (see <a href=
+    "C1_Canonical.html">part C</a>):</p>
+<p class="hoc">
+SThcells[2].soma.v(0.5)
+</p>
+
+    <p>To record this voltage, we prepend an "&amp;" to this
+    variable name, and give it as an argument to the record
+    function of the particular vector object where were want it
+    saved:</p>
+<p class="do-hoc">
+recv.record(&amp;SThcells[2].soma.v(0.5))
+</p>
+
+    <p>The variable <tt>SThcells[0].soma.v(0.5)</tt> (i.e. the
+    voltage in the centre of the third cells soma) will be recorded
+    into this vector on each simulation. Note, that only one
+    simulation is held in the vector. If a second simulation is
+    run, it will overwrite any previous simulation data in this
+    vector.</p>
+
+    <p>To record the time information, the second vector object
+    (<tt>rect</tt>) can be setup to record the time variable
+    <tt>t</tt>.</p>
+<p class="do-hoc">
+rect.record(&amp;t)
+</p>
+
+    <p>Now, run a simulation (either from the <i>RunControl</i>
+    window, or using the hoc command <tt>run()</tt>). The time and
+    voltage data from these variables will be recorded in our two
+    vectors (don't worry if "resize_chunk" messages appear in the
+    terminal, these just indicate the vector objects are growing in
+    size).</p>
+
+    <p>To see the data in the vectors, we can use the vector object
+    function <tt>printf</tt> to display the data in the
+    terminal:</p>
+<p class="hoc">
+recv.printf()
+</p>
+
+    <p>However, it is generally not that useful to print the data
+    onto the screen, as there is usually a lot of data.</p>
+
+    <h3>Saving the Vectors</h3>
+
+    <p>All we want to do now is save the vectors to file. The
+    simplest way of doing this from the <i class="name">hoc</i>
+    programming point of view is to save each vector to a different
+    file. To do this we must create file objects for each file. As
+    with any object, first a variable must be defined for the
+    object (we will call ours <tt>savv</tt> and <tt>savt</tt>).</p>
+<p class="do-hoc">
+objref savv, savt
+</p>
+
+    <p>We now create the file objects using the <tt>new</tt>
+    command:</p>
+<p class="do-hoc">
+savv = new File()
+savt = new File()
+</p>
+
+    <p>The function <tt>wopen</tt> in the file object opens a file
+    for writing to. It takes as an argument the name of the file
+    (we will call our files "cell3somav.dat" and
+    "cell3somat.dat").</p>
+<p class="do-hoc">
+savv.wopen("cell3somav.dat")
+savt.wopen("cell3somat.dat")
+</p>
+
+    <p>We can now save the data in our vectors (<tt>rect</tt> and
+    <tt>recv</tt>) using, again, the vector object <tt>printf</tt>
+    function, but this time with the file object as an
+    argument:</p>
+<p class="do-hoc">
+recv.printf(savv)
+rect.printf(savt)
+</p>
+
+    <p>Finally, the files should be closed:</p>
+<p class="do-hoc">
+savv.close()
+savt.close()
+</p>
+
+    <p>This example creates two text files called "cell3somav.dat"
+    and "cell3somat.dat" containing the voltage and time data
+    respectively. These data files differ from the files generated
+    from the graph <i>PickVector</i> method above. Here there is
+    one data vector per file rather than having two vectors in the
+    same file as above. The first two lines of the file generated
+    using the <i>PickVector</i> method (containing the variable
+    name and number of lines) are also absent from each file using
+    this method.</p>
+
+    <h3>Saving the Vectors in one file</h3>
+
+    <p>To make one output file in the same format as the
+    <i>PickVector</i> method, we have to do some more <i class=
+    "name">hoc</i> programming. A simple way of doing this is to
+    use a for loop and the <tt class="hoc">printf</tt>
+    function.</p>
+
+    <p>First, we create a single file object that opens a file
+    called "cell3soma.dat":</p>
+<p class="do-hoc">
+objref savdata
+savdata = new File()
+savdata.wopen("cell3soma.dat")
+</p>
+
+    <p>We can also put useful data, such as the variable name(s) we
+    are saving (e.g. <tt>SThcells[2].soma.v(0.5)</tt>), and the
+    number of vectors in the file, we can write this to the file
+    first using the <tt class="hoc">printf</tt> function in the
+    File object:</p>
+<p class="do-hoc">
+savdata.printf("t SThcells[2].soma.v(0.5)\n")
+savdata.printf("%d\n",rect.size())
+</p>
+
+    <p>The <tt class="hoc">printf</tt> function in a File object is
+    somewhat different from the <tt class="hoc">printf</tt> in a
+    Vector (seen above), and will be familiar to C programmers. The
+    first time it is used above, it has only one argument which is
+    the text that will be printed to the file. This text is
+    enclosed in quotes and in programming terms is known as a
+    <em>string</em>. The "\n" at the end of the string inserts a
+    newline. The second time it is used it has two arguments. The
+    first argument is a string, but this time it contains a
+    percentage sign followed by a single character, the letter "d".
+    This "%d" is a placeholder for an integer number that is given
+    to the function as an additional argument. The argument in this
+    example is <tt class="hoc">rect.size()</tt>. The function <tt
+    class="hoc">size</tt> is in the Vector object and returns the
+    size of the vector, here, the size of the time vector <tt
+    class="hoc">rect</tt>.</p>
+
+    <p>The next step is to create a for loop (inctroduced in <a
+    href="A3_CreateDendrites.html">part B</a>) that again uses the <tt class=
+    "hoc">printf</tt> function in the File object to write the
+    vectors to the file. As in the <i>PickVector</i> method above,
+    we want each line of our file to have two numbers (time and
+    voltage of the <tt>SThcells[2].soma</tt> at that time):</p>
+<p class="do-hoc">
+for i=0,rect.size()-1 {
+    savdata.printf("%g %g\n", rect.x(i), recv.x(i))
+}
+</p>
+
+    <p>In this case the <tt>printf</tt> function has three
+    arguments. As before the first argument is a string of text
+    containing placeholders for numbers. They are "%g" rather than
+    "%d" because the arguments are real rather than integer
+    numbers. It is possible to alter the formatting of the numbers
+    by using letters other than "g" and "d" after the percentage
+    sign; see the <a href=
+    "http://www..yale.edu//docs/help/index.html">online
+    manual</a> for more <a href=
+    "http://www..yale.edu//docs/help//general/function/io/printf.html#printf">
+    information about printf</a>. The first string argument
+    contains two "%g" placeholders, indicating <b>two</b> real
+    numbers are requred as additional arguments. These real numbers
+    are the data from the time and voltage vectors. The <tt class=
+    "hoc">x</tt> function in the Vector object returns the data at
+    a given location in the vector. For example, <tt class=
+    "hoc">rect.x(0)</tt>, is the first ellement in the <tt class=
+    "hoc">rect</tt> vector, and <tt class="hoc">rect.x(1)</tt>, is
+    the second etc. In our for loop, we use <tt class=
+    "hoc">x(i)</tt> to cycle through each vector ellement, so that
+    each data pair gets written to the file in sequence.</p>
+
+    <p>Finally, we close the file as shown above.</p>
+<p class="do-hoc">
+savdata.close()
+</p>
+
+    <h3>Saving the Vectors more efficiently</h3>
+
+    <p>The use of a for loop may be inefficient for large vectors,
+    as the <i class="name">hoc</i> interpreter has to perform as
+    many file <tt class="hoc">printf</tt> statements as there are
+    elements in the vectors. A more efficient way of doing this is
+    to use Matrix objects. The sample code is below. For further
+    explanation, consult the <a href=
+    "http://www..yale.edu//docs/help//general/classes/matrix/matrix.html">
+    Matrix section</a> of the <a href=
+    "http://www..yale.edu//docs/help/index.html">online
+    manual</a>.</p>
+<p class="hoc">
+objref savdata
+savdata = new File()
+savdata.wopen("cell3somav.dat")
+
+savdata.printf("t SThcells[2].soma.v(0.5)\n")
+
+objref tempmatrix
+tempmatrix = new Matrix()
+tempmatrix.resize(recv.size(),2)
+tempmatrix.setcol(0, rect)
+tempmatrix.setcol(1, recv)
+tempmatrix.fprint(savdata, " %g")
+savdata.close()
+</p>
+
+    <p>The method of recording data into vector objects, then
+    saving the objects to files may seem like a lot of work
+    compared to clicking on a graph. However, as we have stressed
+    before, the usefulness comes from including variants of such
+    commands in <i class="name">hoc</i> scripts. These scripts can
+    then be executed performing various and often complex I/O
+    functions. The <i class="name">hoc</i> objects and functions we
+    have introduced also have many options and uses well beyond
+    what we have described. We refer the reader to the <i class=
+    "name"></i> help and reference web pages for exploring
+    the different ways and methods of getting data out of <i class=
+    "name"></i>.</p>
+
+    <h2>
+      <!-- class="name">hoc</i> is somewhat different.  Instead of applying -->
+      <!-- record to the Vector object, we have to record from the cvode object: -->
+      <!-- </p> -->
+      <!-- <p class="do-hoc"> -->
+      <!-- objref rect, recv -->
+      <!-- rect = new Vector() -->
+      <!-- recv = new Vector() -->
+      <!-- cvode.record(&v(0),recv,rect) -->
+      <!-- </p> -->
+      <!-- <p>This will store the times of the steps in <tt>rect</tt> and the corresponding -->
+      <!-- membrane potential at <tt>recv</tt>.  They can be saved as before. -->
+      <!-- </p> -->
+      <!-- <p>To stop recording into the vectors, we use the command: -->
+      <!-- </p> -->
+      <!-- <pre>cvode.record_remove(recv) -->
+      <!-- </p> -->
+      <!-- <p> -->
+      <!-- Although this only refers to <tt>recv</tt>, this also stops recording into <tt>rect</tt>. -->
+      <!-- </p> -->
+    </h2>
+
+    <h2>References</h2>
+
+    <p class="ref">Hines, M. L. and Carnevale, N. T. (2001)
+    ": a Tool for Neuroscientists", <em>The
+    Neuroscientist</em> <b>7</b>:123-135.</p>
+    <hr>
+
+    <address>
+      Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+       David Sterratt (dcs@anc.ed.ac.uk)<br>
+       with the assistance of Ted Carnevale and Michael Hines<br>
+        Last modified on 
+      25 February 2010 at 16:17
+    </address>
+    <!--  LocalWords:  HTML css div lightgray ref em pt subthalamic sthB nrn dend
+                     -->
+    <!--  LocalWords:  ndend nseg diam Ra hh Rall Agmon Snir section's var proc del
+                     -->
+    <!--  LocalWords:  nrngui objectvar stim IClamp dur tstop gnabar cm msec
+                     -->
+    <!--  LocalWords:  RC vs Hines ina Init RunControl PostScript TM 's ses
+                     -->
+    <!--  LocalWords:  xopen Segev Intl Bio Comput Gillies NMODL gl RSI gkbar
+                     -->
+    <!--  LocalWords:  MSWin MacOS Ted Carnevale loc init sthE toolbar rect
+                 -->
+    <!--  LocalWords:  recv objref SThcells nSThcells cvode atol VariableTimeStep
+     -->
+    <!--  LocalWords:  dialog atolscale Sterratt Neuroscientist
+     -->
+  <!-- InstanceEndEditable --></td>
+  </tr>
+  <tr>
+    <td colspan="2"><!-- #BeginLibraryItem "/Library/creditsNEURONtutorial.lbi" -->
+    <style type="text/css">
+<!--
+.style3 {
+	font-family: "Times New Roman", Times, serif;
+	font-size: x-small;
+}
+-->
+    </style>
+    <link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+    <h3>Acknowledgements</h3>
+    <p class="extra">Last modified on 10/29/04 by<br>
+  Albert Borroni, CS/Neuoriscience Oberlin College (aborroni@oberlin.edu)</p>
+    <p><span class="extra">based on tutorial written by <br>
+  Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+  David Sterratt (dcs@anc.ed.ac.uk)<br>
+  which is originally based on the tutorials by Kevin E. Martin<br>
+  with the assistance of Ted Carnevale and Michael Hines<br>
+      </span> <span class="style3">
+      
+      </span>
+      25 February 2010 at 16:17
+    </p>
+    <!-- #EndLibraryItem --></td>
+  </tr>
+</table>
+</body>
+<!-- InstanceEnd --></html>

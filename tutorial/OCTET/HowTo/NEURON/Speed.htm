@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/HowTo.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Untitled Document</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+<link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<table width="100%" height="260"  border="0" cellpadding="1" cellspacing="2">
+  <tr>
+    <td width="100" height="1"><img src="../../images/spacer.gif" width="100" height="1"></td>
+    <td height="1"></td>
+  </tr>
+  <tr valign="top">
+    <td width="100"><a href="index.html">Home</a></td>
+    <td></td>
+  </tr>
+  <tr valign="top">
+    <td width="100" height="111"><p><a href="A1_MyFirstNeuon.html" alt = "creating a soma ">A.1</a><br>
+        <a href="A2_GUI.htm">A.2</a><br>
+        <a href="A3_CreateDendrites.html">A.3</a></p>
+    <p><a href="B1_RealismChannels.htm">B.1</a><br>
+      <a href="B2_RealisticMorph.html">B.2</a></p>
+    <p><a href="C1_Templates.html">C.1</a><br>
+      <a href="C2_ConnectingMultiple.html">C.2</a><br>
+      <a href="C3_ViewingMultipleNeurons.htm">C.3
+      </a></p>
+    <p><a href="D1_NMODL.html">D.1</a></p>
+    <p><a href="ColllectDataVectors.html">E.1</a><br>
+      <a href="Speed.htm">E.2</a><br>
+      <a href="PrintingWindows.htm">E.3</a><br>
+      <a href="Sessions.htm">E.4</a><br>
+      E.5<br>
+      <a href="BlockingChannels.htm">E.6</a><br>
+    </p>
+    <p><a href="Commands.htm">Basic <br>
+      Commands</a></p>
+    <p>Manual</p>
+    <p>&nbsp;</p></td>
+  <td><!-- InstanceBeginEditable name="Content" -->
+<h2>Speed of Simulation</h2>
+<p>The speed of a simulation is proportional to the number of segments and inversely
+  proportional to the time step. Therefore, to speed up a simulation, we can
+  reduce the number of segments (by using <tt>nseg</tt>) or increase <tt>dt</tt>.
+  However, both these measures will decrease the accuracy of the simulation. <a href=
+    "http://www..yale.edu//docs/spacetime.pdf">Hines and Carnevale
+  (2001)</a> discuss the tradeoff between accuracy and speed in an accessible
+  fashion.</p>
+<p>They also discuss another strategy for speeding up simulations: variable time
+  step methods. The principle of a variable time step method is that the time
+  step is longer when quantities are not changing much (such as between action
+  potentials) and shorter when quantities are changing quickly (such as during
+  an action potential). <i class=
+    "name"></i> incorporates a standard variable time step method called <b><i class="name">cvode</i></b>.
+  We will show basic use of <i class="name">cvode</i> in <i class=
+    "name"></i>.</p>
+<p>By default, <i class="name"></i> uses fixed time step integration. The
+  command</p>
+<p class="do-hoc"> cvode_active() </p>
+<p>returns 0, indicating that variable time steps are not being used. To turn
+  on the variable time step integration we can type:</p>
+<p class="do-hoc"> cvode_active(1) </p>
+<p>(We could also select the <i>Tools-VariableTimeStep</i> dialog and click on <i>Use
+    variable dt</i>.)</p>
+<p>When you try running the simulation again, you should see that it runs much
+  faster than before turning <i class=
+    "name">cvode</i>. (On a fast machine, you may not notice the lines on the
+  graph being drawn.) To turn off <i class=
+    "name">cvode</i>, either type:</p>
+<p class="do-hoc"> cvode_active(0) </p>
+<p>or deselect <i>Use variable dt</i> in the <i>Tools-VariableTimeStep</i> dialog.</p>
+<p>In the fixed-timestep method of simulation, the accuracy of the simulation
+  can be changed by specifying the timestep. In the variable time step method,
+  there is no one time step to change; instead we specify a <em>tolerance</em>,
+  that is the maximum estimated error allowed at each time step. Smaller tolerances
+  will lead to more accurate but longer simulations. To find what the tolerance
+  is, we type</p>
+<p class="do-hoc"> cvode.atol() </p>
+<p>We see that the default value (in <i class="name"></i> 5.4 and newer)
+  is 0.001. This gives about the same accuracy as a fixed time step of 25&mu;s
+  on the Hodgkin-Huxley action potential simulation at 6.3&deg;C. You can investigate
+  the effect of changing the accuracy by setting it with</p>
+<p class="do-hoc"> cvode.atol(0.0001) </p>
+<p>or by setting <i>Absolute tolerance</i> in the <i>Tools-VariableTimeStep</i> dialog.</p>
+<p>An important point to note is that this is an <em>absolute</em> tolerance.
+  For quantities such as membrane potential measured in millivolts, 0.001 is
+  small. However, if our simulation contained quantities that have very small
+  absolute values, the absolute tolerance we have specified could be many orders
+  of magnitude greater than these quantities. It is possible to set smaller tolerances
+  for some variables (e.g. calcium concentration); see <tt>atolscale</tt> in
+  the  documentation.</p>
+<p>When we are using <i class="name">cvode</i>, we can still use the <i>PickVector</i> or
+  record vector methods (above) to save data to file (<b>Note</b>: in <i class="name"></i> 5.4
+  and earlier the record vector methods cannot be used with <i class="name">cvode</i>.
+  An alternative record method in the cvode object is provided in the earlier
+  versions.)</p>
+<!-- However, the method of recording vectors in <i -->
+<!-- InstanceEndEditable --></td>
+  </tr>
+  <tr>
+    <td colspan="2"><!-- #BeginLibraryItem "/Library/creditsNEURONtutorial.lbi" -->
+    <style type="text/css">
+<!--
+.style3 {
+	font-family: "Times New Roman", Times, serif;
+	font-size: x-small;
+}
+-->
+    </style>
+    <link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+    <h3>Acknowledgements</h3>
+    <p class="extra">Last modified on 10/29/04 by<br>
+  Albert Borroni, CS/Neuoriscience Oberlin College (aborroni@oberlin.edu)</p>
+    <p><span class="extra">based on tutorial written by <br>
+  Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+  David Sterratt (dcs@anc.ed.ac.uk)<br>
+  which is originally based on the tutorials by Kevin E. Martin<br>
+  with the assistance of Ted Carnevale and Michael Hines<br>
+      </span> <span class="style3">
+      
+      </span>
+      25 February 2010 at 16:17
+    </p>
+    <!-- #EndLibraryItem --></td>
+  </tr>
+</table>
+</body>
+<!-- InstanceEnd --></html>

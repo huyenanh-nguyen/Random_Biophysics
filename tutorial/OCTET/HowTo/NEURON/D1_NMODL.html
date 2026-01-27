@@ -1,0 +1,852 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/HowTo.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>NEURON Tutorial </title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+    <meta name="generator" content="HTML Tidy, see www.w3.org">
+
+    
+    <link rel="stylesheet" href="tutD_files/style.css" type="text/css"><!-- InstanceEndEditable -->
+<link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<table width="100%" height="260"  border="0" cellpadding="1" cellspacing="2">
+  <tr>
+    <td width="100" height="1"><img src="../../images/spacer.gif" width="100" height="1"></td>
+    <td height="1"></td>
+  </tr>
+  <tr valign="top">
+    <td width="100"><a href="index.html">Home</a></td>
+    <td></td>
+  </tr>
+  <tr valign="top">
+    <td width="100" height="111"><p><a href="A1_MyFirstNeuon.html" alt = "creating a soma ">A.1</a><br>
+        <a href="A2_GUI.htm">A.2</a><br>
+        <a href="A3_CreateDendrites.html">A.3</a></p>
+    <p><a href="B1_RealismChannels.htm">B.1</a><br>
+      <a href="B2_RealisticMorph.html">B.2</a></p>
+    <p><a href="C1_Templates.html">C.1</a><br>
+      <a href="C2_ConnectingMultiple.html">C.2</a><br>
+      <a href="C3_ViewingMultipleNeurons.htm">C.3
+      </a></p>
+    <p><a href="D1_NMODL.html">D.1</a></p>
+    <p><a href="ColllectDataVectors.html">E.1</a><br>
+      <a href="Speed.htm">E.2</a><br>
+      <a href="PrintingWindows.htm">E.3</a><br>
+      <a href="Sessions.htm">E.4</a><br>
+      E.5<br>
+      <a href="BlockingChannels.htm">E.6</a><br>
+    </p>
+    <p><a href="Commands.htm">Basic <br>
+      Commands</a></p>
+    <p>Manual</p>
+    <p>&nbsp;</p></td>
+  <td><!-- InstanceBeginEditable name="Content" -->
+    <h1>A NEURON Programming Tutorial - part D</h1>
+
+    <p>Note: To truly understand what is being done in NMODL one would need a
+      background in differential equations. This tutorial illustrates how someone
+      with an understanding of kinetics and differential equations could create
+      their own channel and use it in NEURON. </p>
+    <p>For those not familiar with kinetic processes and differential equations,
+      this tutorial will give you an idea of how channels are created but will
+      not give you an understanding of how the variables used in creating the
+      channels are actually derived. </p>
+    <p>If you simply want to add a channel definition (.mod) file created by
+      someone else to your neuron, skip to section on &quot;<a href="D1_NMODL.html#NMODL">NMODL &amp; NEURON</a>&quot; using
+      .mod files.</p>
+    <h2>Introduction</h2>
+    <p>Although our simulated neurons were given a characteristic
+    subthalamic nucleus projection neuron morphology in tutorial <a href="http://www.anc.ed.ac.uk/school/neuron/tutorial/tutC.html">part C</a>, they still only contain the
+    default Hodgkin and Huxley types of sodium and potassium ion
+    selective channels. We would like to make our neurons much more
+    <b>electrophysiologically</b> characteristic of subthalamic
+    nucleus neurons. There are many channel types we would want to
+    add, but for the tutorial we will add only one new type.</p>
+
+    <p><img alt="post hyperpolarising response" src="tutD_files/Nak01.gif" style="float: left;" height="144" width="156">An important
+    electrophysiological feature of subthalamic neurons is the post
+    hyperpolarising response. When a neuron is hyperpolarised (e.g.
+    by current injection or inhibitory synaptic input), at the end
+    of the hyperpolarisation, a burst of activity is observed in
+    subthalamic projection neurons (see left). This response is
+    mediated by a low threshold calcium selective ion channel,
+    called the <b>T-type</b> calcium channel.</p>
+
+    <p>The current <b><em>I</em><sub>T</sub></b> produced from the
+    T-type calcium channels was characterised within the
+    Hodgkin-Huxley framework by Wang <em>et al.</em> (1991):</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equationsIt.gif" align="middle" border="0" height="26" hspace="10" width="203">
+    </center>
+
+    <p>where <b><em>g</em><sub><em>T</em>(max)</sub></b> is the
+    maximum T-type calcium conductance, <b><em>r</em></b> is the
+    activation state variable, <b><em>s</em></b> is the
+    inactivation state variable, <b><em>E</em><sub>Ca</sub></b> is
+    the reversal potential for calcium and <b><em>V</em></b> is the
+    neuron membrane potential. </p>
+    <hr>
+    <p>The state variables <b><em>r</em></b> and <b><em>s</em></b> are given
+      by the following kinetic systems:</p>
+    <center>
+      <img alt="T channel kinetics" src="tutD_files/Tkinetic.gif" align="middle" border="0" height="80" hspace="10" width="494">
+    </center>
+
+    <p>Here "C" refers to a closed state and "O" refers to an open
+    state. The &#945; and &#946; variables are the forward and
+    backward rate constants from one state to another; they are
+    voltage dependent functions specified in Wang <em>et al.</em>
+    (1991). Note that inactivation is a three state kinetic
+    process, with fast (<b><em>s</em></b>) and slow
+    (<b><em>d</em></b>) components).</p>
+
+    <p>The kinetic schemes translate to three differential
+    equations:</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equations.gif" align="middle" border="0" height="75" hspace="10" width="182">
+    </center>
+
+    <p>We would like to add this channel to our model. Sadly this
+    cannot be done with the programming language <i class="name">hoc</i> that we have used in the previous tutorial
+    parts. Instead we have to learn the <b>Model Description
+    Language</b> (<i class="name">NMODL</i>) provided for defining
+    additional distributed membrane mechanisms such as ion channels
+    and calcium pumps and point processes such as synapses. [Note,
+    in the future it is planned that <i class="name">NMODL</i>
+    descriptions will be replaced by JAVA objects].</p>
+
+    <p>This tutorial shows you how to use <i class="name">NMODL</i>
+    to create the T-type channel we need. This should be applicable
+    to other types of voltage-dependent channels too. <i class="name">NMODL</i> is capable of much more, but that is outside
+    the scope of this tutorial; the document <a href="http://www.neuron.yale.edu/neuron/papers/nc2000/nmodl.htm"><i>Expanding
+    NEURON's Repertoire of Mechanisms with NMODL</i></a> by Mike
+    Hines and Ted Carnevale contains comprehensive description of
+    how to use NMDOL for different purposes. A shorter version of
+    this document is also available
+    (Hines &amp; Carnevale, 2000).</p>
+
+    <h2><a name="nmodl">NMODL</a></h2>
+
+    <p>&nbsp;</p>
+    <hr>
+    <p>A description of a membrane mechanism in <i class="name">NMODL</i> is
+      a text file divided into a number of blocks. A block begins with a keyword
+      defining the type of block, then an open brace "<b>{</b>", followed by
+      block specific definitions, and finally, the block is ended with a
+    closing brace "<b>}</b>". The best way to learn to program new
+    membrane mechanisms using <i class="name">NMODL</i> is by
+    following examples of already defined mechanisms. There are a
+    number of <i class="name">NMODL</i> examples provided with the
+    <i class="name">NEURON</i> package. Here we will go through,
+    step by step, an example of a new channel mechanism.</p>
+    <p>We will construct a <i class="name">NMODL</i> file, called
+    <var>CaT.mod</var> to calculate the low threshold calcium
+    channel kinetics. As with <i class="name">hoc</i> files we can
+    use our favourite text editor to create this file.</p>
+    <h3>Before starting </h3>
+    <p>Open a new Notepad document and save it as CaT.mod in the same folder
+      as all the other NEURON files. </p>
+    <h3>The TITLE and UNITS blocks</h3>
+
+    <p>We start the <i class="name">NMODL</i> file with some
+    standard definitions useful in most channel membrane
+    mechanisms:</p>
+<pre class="nmodl">TITLE Calcium T channel for Subthalamic Nucleus
+
+UNITS {
+    (mV) = (millivolt)
+    (mA) = (milliamp)
+}
+</pre>
+
+    <ul>
+      <li>The <tt>TITLE</tt> keyword allows us to identify what
+      this file is describing, though it is not required.</li>
+
+      <li>The <tt>UNITS</tt> block defines more convenient aliases
+      for the the units that will be used in this file. By default,
+      NMODL understands units in the UNIX units database (see file
+      <tt>/usr/share/units.dat</tt> or look at the <tt>units</tt>
+      command on LINUX machines). It uses these units to check that
+      that equations are consistent. In the above example we are
+      telling NMODL that we want to use <tt>mV</tt> as a shorthand
+      for <tt>millivolt</tt> and <tt>mA</tt> as a shorthand for
+      <tt>milliamp</tt>.</li>
+    </ul>
+
+    <h3>The NEURON block</h3>
+
+    <p>The <tt>NEURON</tt> block is the public interface of the
+    mechanism. It tells the <i class="name">hoc</i> interpreter how
+    to refer to the mechanism and what variables it can see or
+    change. The structure of the block is as follows:</p>
+<pre>NEURON {
+    SUFFIX <i>suffix</i>
+    USEION <i>ions...</i> READ <i>vars...</i> WRITE <i>vars...</i>
+    RANGE <i>var,var,...</i>
+    GLOBAL <i>var,var,...</i>
+}
+</pre>
+
+    <p>The first step is to identify this mechanism from all other
+    membrane mechanisms when referencing it from the <i class="name">hoc</i> language. This is done through the
+    <tt>SUFFIX</tt> statement of the block. Access to all variables
+    in this mechanism from the <i class="name">hoc</i> file is then
+    done using the suffix. For example, we will call this channel
+    mechanism "CaT", so to access variables in the mechanism from
+    <i class="name">hoc</i> we use <i>var</i>_CaT (where <i>var</i>
+    is a variable in this mechanism).</p>
+
+    <p>The <tt>USEION</tt> statement specifies what ions this
+    channel mechanism uses. There are three ions <i class="name">NEURON</i> knows about, <tt>na</tt>, <tt>k</tt>,
+    <tt>ca</tt>, however, others may also be defined via this
+    statement. <i class="name">NEURON</i> <em>can</em> keep track
+    of the intracellular and extracellular concentrations of each
+    ion. (Typically, these are actually concentrations in small
+    shells around either side of the membrane.) Dealing with ions
+    is difficult, because more than one mechanism may affect a
+    particular ion. For example, we may have more than one calcium
+    channel mechanism. Therefore, when dealing with ions use
+    <b>exactly</b> the same name used in all other mechanisms.</p>
+
+    <p>The <tt>READ</tt> modifier lists ionic variables needed in
+    calculating the ionic channel current (usually the equilibrium
+    potential, or concentration). The <tt>WRITE</tt> modifier lists
+    what ionic variables are calculated in this mechanism (usually
+    the current). In our example we use:</p>
+<pre class="nmodl">USEION ca READ eca WRITE ica
+</pre>
+
+    <p><tt>eca</tt> is the equilibrium potential for ion
+    <tt>ca</tt>, and <tt>ica</tt> is the calcium current, to be
+    calculated in this mechanism.</p>
+
+    <p>You probably expect that since we have just introduced
+    <tt>ica</tt>, a calcium current, <i class="name">NEURON</i>
+    will automatically adjust the intra- and extracellular calcium
+    concentrations. <strong>It doesn't</strong> (though it can; <a href="D1_NMODL.html#ions">the box</a> contains more details.) One way to
+    think about this is that in this tutorial, we have deliberately
+    chosen not to model calcium accumulation adjacent to the
+    membrane, either intracellularly or extracellularly.</p>
+    <a name="ions"></a> 
+
+    <div class="box">
+      <p><strong>Note on how <i class="name">NEURON</i> deals with
+      ions</strong></p>
+
+      <p><i class="name">NEURON</i> does not change the calcium
+      <em>concentrations</em> automatically. To do this, we would
+      need another mechanism defined in an <i class="name">NMODL</i> file that would WRITE <tt>cai</tt> and/or
+      <tt>cao</tt>, the intra- and extracellular calcium
+      concentrations. However this mechanism would need to know the
+      total calcium current <tt>ica</tt> originating from our CaT
+      mechanism and any other mechanisms affecting calcium current.
+      <i class="name">NEURON</i> provides a means of doing this,
+      but it is outside the scope of this tutorial.</p>
+    </div>
+
+    <p>The <tt>RANGE</tt> statement makes the following variables
+    visible to the <i class="name">NEURON</i> interpreter and
+    specifies that they are be functions of position. For example,
+    the maximum channel conductance should be a <i>RANGE</i>
+    variable, since it can be different at different points on a
+    neuron.</p>
+
+    <p>The <tt>GLOBAL</tt> statement specifies variables that are
+    always the same for the mechanism. This mechanism does not have
+    any GLOBAL variables. Our final <tt>NEURON</tt> block now has
+    the form:</p>
+<pre class="nmodl">NEURON {
+    SUFFIX CaT
+    USEION ca READ eca WRITE ica
+    RANGE gmax
+}
+</pre>
+
+    <p>We have called the maximum channel conductance variable
+    <tt>gmax</tt>.</p>
+
+    <h3>The PARAMETER block</h3>
+
+    <p>The PARAMETER block specifies variables that:</p>
+
+    <ul>
+      <li>are not changed as a result of the calculations in the
+      mechanism;</li>
+
+      <li>are (generally) constant throughout time; and</li>
+
+      <li>can be changed by the user from the <i class="name">hoc</i> interface or the GUI.</li>
+    </ul>
+
+    <p>We can see from the equation:</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equationsIt.gif" align="middle" border="0" height="26" hspace="10" width="203">
+    </center>
+
+    <p>that in calculating this channel current our model will use
+    the voltage <tt>v</tt>, the maximum conductance we declared in
+    the <tt>NEURON</tt> block above, <tt>gmax</tt> and the calcium
+    equilibrium potential, <tt>eca</tt>. Of these only
+    <tt>gmax</tt> satisfies the conditions above; <tt>v</tt> is
+    calculated at every time step by <i class="name">NEURON</i>
+    rather than being specified by the user, and <tt>eca</tt> may
+    also be calculated at each time step depending on the calcium
+    concentrations. The <tt>PARAMETER</tt> block is:</p>
+<pre class="nmodl">PARAMETER {
+    gmax  = 0.002 (mho/cm2)
+}
+</pre>
+
+    <p>For each parameter, we specify the name of the parameter,
+    its default value and its units (in parentheses).</p>
+
+    <p>We change the value of <tt>gmax</tt> in a segment in which
+    CaT is inserted from <i class="name">hoc</i> as follows:</p>
+<pre class="hoc">soma gmax_CaT = 0.001
+</pre>
+
+    <h3>The ASSIGNED block</h3>
+
+    <p>The ASSIGNED block declares variables that are either:</p>
+
+    <ul>
+      <li>calculated by the mechanism itself or</li>
+
+      <li>computed by <i class="name">NEURON</i>.</li>
+    </ul>
+
+    <p>Variables that this mechanism will compute are the calcium
+    current <tt>ica</tt>, and variables for the rate equations
+    <tt>ralpha</tt>, <tt>rbeta</tt>, <tt>salpha</tt> etc. The
+    variables that the mechanism uses that are computed by <i class="name">NEURON</i> are the membrane potential <tt>v</tt>
+    and the calcium equilibrium potential <tt>eca</tt>. The
+    <tt>ASSIGNED</tt> block is:</p>
+<pre class="nmodl">ASSIGNED { 
+    v    (mV)
+    eca  (mV)
+    ica  (mA/cm2)
+    ralpha (/ms)
+    rbeta (/ms)
+    salpha (/ms)
+    sbeta (/ms)
+    dalpha (/ms)
+    dbeta (/ms)
+}
+</pre>
+
+    <div class="box">
+      <p><strong><a name="start-with-program">Note on equilibrium
+      potentials</a></strong></p>
+
+      <p>As mentioned above <tt>eca</tt> is calculated by <i class="name">NEURON</i>. How and when it is calculated depends on
+      the particular mechanisms dealing with ions that are inserted
+      in a section. In this tutorial, although there is a calcium
+      current <tt>ica</tt>, we have deliberately chosen not to
+      represent calcium accumulation adjacent to the membrane,
+      either intracellularly or extracellularly (see the Box: <a href="D1_NMODL.html#ions">Note on how NEURON deals with ions</a>). So in
+      our case <i class="name">NEURON</i> use a built-in, i.e.
+      "default", eca. But <i class="name">NEURON</i>'s default
+      values for <tt>eca</tt>, <tt>ena</tt>, and <tt>ek</tt> are
+      not appropriate for our mammalian subthalamic nucleus. We
+      want to use typical mammalian values like the following (from
+      Johnston &amp; Wu, 1999):</p>
+
+      <center>
+        <table summary="Ionic concentrations and conductances." border="1">
+          <tbody><tr>
+            <td colspan="2" align="center"><b>Na</b> </td>
+
+            <td colspan="2" align="center"><b>K</b> </td>
+
+            <td colspan="2" align="center"><b>Ca</b> </td>
+          </tr>
+
+          <tr>
+            <td><i>inside</i> </td>
+
+            <td><i>outside</i> </td>
+
+            <td><i>inside</i> </td>
+
+            <td><i>outside</i> </td>
+
+            <td><i>inside</i> </td>
+
+            <td><i>outside</i> </td>
+          </tr>
+
+          <tr>
+            <td align="center">10 mM</td>
+
+            <td align="center">145 mM</td>
+
+            <td align="center">140 mM</td>
+
+            <td align="center">5 mM</td>
+
+            <td align="center">2e-4 mM</td>
+
+            <td align="center">2.5 mM</td>
+          </tr>
+
+          <tr>
+            <td colspan="2" align="center"><tt>ena</tt> =
+            71.5 mV</td>
+
+            <td colspan="2" align="center"><tt>ek</tt> =
+            -89.1 mV</td>
+
+            <td colspan="2" align="center"><tt>eca</tt> =
+            126.1 mV</td>
+          </tr>
+        </tbody></table>
+      </center>
+
+      <p>where the equilibrium potentials <tt>ena</tt>,
+      <tt>ek</tt>, and <tt>eca</tt> are calculated at 37 degrees
+      Celsius according to the Nernst equation. We will set all of
+      these equilibrium potentials as our model has channels using
+      each of these ion species. These should be set <b>after</b>
+      the channel mechanisms are inserted into a section, and must
+      be set for each section that has channels using that ionic
+      species inserted. In our model, only the soma has such
+      channels. We can modify our <tt>SThcell</tt> template, adding
+      these equilibrium potential parameter values to the soma
+      block:</p>
+<pre class="hoc">     soma {
+      nseg = 1
+      diam = 18.8
+      L = 18.8
+      Ra = 123.0
+      insert hh
+      ena = 71.5
+      ek = -89.1
+      gnabar_hh=0.25
+      gl_hh = .0001666
+      el_hh = -60.0
+      insert CaT
+      eca = 126.1
+    }
+</pre>
+
+      <p>Remember, if you insert channels into other sections, you
+      must modify the appropriate equilibrium potentials in that
+      section to make them consistent with the soma section.</p>
+    </div>
+
+    <h3>The STATE block</h3>
+
+    <p>The STATE block declares state variables. One type of state
+    variable are the variables that we are trying to solve for in
+    kinetic schemes. There are three state variables in our kinetic
+    channel model, <tt>r</tt>, <tt>s</tt> and <tt>d</tt>. The
+    <tt>STATE</tt> block is:</p>
+<pre class="nmodl">STATE {
+    r s d
+}
+</pre>
+
+    <h3>The heart of the mechanism</h3>
+
+    <p>We now come to the heart of the mechanism. We wish to
+    calculate the values of the variables <tt>r</tt>, <tt>s</tt>
+    and <tt>d</tt> in order to calculate the calcium current from
+    the above equation. These are given by the three kinetic
+    differential equations:</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equations.gif" align="middle" border="0" height="75" hspace="10" width="182">
+    </center>
+
+    <p>We must first calculate each of the functions
+    <tt>ralpha</tt>, <tt>rbeta</tt>, <tt>salpha</tt>,
+    <tt>sbeta</tt>, <tt>dalpha</tt> and <tt>dbeta</tt>. These
+    voltage dependent functions are specified by Wang <em>et
+    al.</em>. We can create a <tt>PROCEDURE</tt> to calculate these
+    functions. This allows us to calculate the equations at any
+    time by simply using our defined procedure. A procedure is
+    defined using the following format:</p>
+<pre>PROCEDURE <i>name</i>(<i>vars</i>) {
+    <i>calculations...</i>
+}
+</pre>
+
+    <p>In our case, we need a procedure that takes the current
+    voltage <tt>v</tt> and calculates values of the variables
+    <tt>ralpha</tt>, <tt>rbeta</tt> etc. We will call our procedure
+    <tt>settables</tt>. [Note the actual functions are taken from
+    Wang <em>et al.</em> (1991)]</p>
+<pre class="nmodl">PROCEDURE settables(v (mV)) {
+    LOCAL  bd
+
+    ralpha = 1.0/(1.7+exp(-(v+28.2)/13.5))
+    rbeta  = exp(-(v+63.0)/7.8)/(exp(-(v+28.8)/13.1)+1.7)
+
+    salpha = exp(-(v+160.3)/17.8)
+    sbeta  = (sqrt(0.25+exp((v+83.5)/6.3))-0.5) * 
+                     (exp(-(v+160.3)/17.8))
+
+    bd     = sqrt(0.25+exp((v+83.5)/6.3))
+    dalpha = (1.0+exp((v+37.4)/30.0))/(240.0*(0.5+bd))
+    dbeta  = (bd-0.5)*dalpha
+}
+</pre>
+
+    <p>As these functions will need to be reevaluated at each time
+    step (as the voltage is changing), it is more computationally
+    efficient to create a table of values calculated at closely
+    spaced voltages at the start of a simulation, and use table
+    lookup with linear interpolation based on the current voltage
+    (memory is cheaper than computation). This can be done by
+    simply adding a <tt>TABLE</tt> line to the procedure. The
+    <tt>TABLE</tt> command has the form:</p>
+<pre>TABLE <i>funcs</i> DEPEND <i>vars</i> FROM <i>lowest</i> TO <i>highest</i> WITH <i>steps</i>
+</pre>
+
+    <p>Where <i>funcs</i>, are the variables representing the
+    functions to create tables for (e.g. the alpha and beta
+    function variables) and <i>vars</i> are the variables, that if
+    they change value then all tables must be recalculated. In our
+    case, <i>lowest</i> and <i>highest</i> are the lowest and
+    highest values of the voltage we make the tables over, with
+    <i>steps</i> steps between them. Our procedure now looks
+    like:</p>
+<pre class="nmodl">PROCEDURE settables(v (mV)) { 
+    LOCAL bd 
+    TABLE ralpha, rbeta, salpha, sbeta, dalpha, dbeta 
+        FROM -100 TO 100 WITH 200
+
+    ralpha = 1.0/(1.7+exp(-(v+28.2)/13.5))
+    rbeta  = exp(-(v+63.0)/7.8)/(exp(-(v+28.8)/13.1)+1.7)
+
+    salpha = exp(-(v+160.3)/17.8)
+    sbeta  = (sqrt(0.25+exp((v+83.5)/6.3))-0.5) * 
+                     (exp(-(v+160.3)/17.8))
+
+    bd     = sqrt(0.25+exp((v+83.5)/6.3))
+    dalpha = (1.0+exp((v+37.4)/30.0))/(240.0*(0.5+bd))
+    dbeta  = (bd-0.5)*dalpha
+}
+</pre>
+
+    <p>Now, to calculate all the alpha and beta functions we simply
+    call the procedure <tt>settables</tt>. The alpha and beta
+    functions are used by our differential equations:</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equations.gif" align="middle" border="0" height="75" hspace="10" width="182">
+    </center>
+
+    <p>These equations can be directly specified in a
+    <tt>DERIVATIVE</tt> block. The <tt>DERIVATIVE</tt> block
+    requires a name, and we will call ours <tt>states</tt>.</p>
+<pre class="nmodl">DERIVATIVE states {  
+    settables(v)      
+    r' = ((ralpha*(1-r)) - (rbeta*r))
+    d' = ((dbeta*(1-s-d)) - (dalpha*d))
+    s' = ((salpha*(1-s-d)) - (sbeta*s))
+}
+</pre>
+
+    <p>Each time <i class="name">NEURON</i> calculates the
+    differential equations, the alpha and beta variables must be
+    updated, so the first line calls our procedure
+    <tt>settables</tt> with the current voltage <tt>v</tt>. Then
+    each differential equation is specified.</p>
+
+    <p>Our <tt>BREAKPOINT</tt> is the top level mechanism
+    calculation block that simply solves the differential equations
+    and calculates the calcium current.</p>
+<pre class="nmodl">BREAKPOINT {
+    SOLVE states METHOD cnexp
+    ica = gmax*r*r*r*s*(v-eca)
+}
+</pre>
+
+    <p>The current is calculated directly from the equation:</p>
+
+    <center>
+      <img alt="T channel equations" src="tutD_files/equationsIt.gif" align="middle" border="0" height="26" hspace="10" width="203">
+    </center>
+
+    <p>The <tt>SOLVE</tt> statement refers to the <tt>states</tt>
+    defined in our <tt>DERIVATIVE</tt> block.  The <tt>METHOD
+    cnexp</tt> part of the line tells <i class="name">NEURON</i> to
+    use the "cnexp" method of integration.  This method is suitable
+    for mechanisms of the form</p>
+    <center>
+      <img alt="y' = f(V,y)" src="tutD_files/equationsfVy.gif" align="middle" border="0" height="26" hspace="10" width="109">
+    </center>
+<p>
+where <i>f</i> is linear in <i>y</i> and involves no other states.
+Hodgkin-Huxley-type equations fall into this category.
+</p>
+
+    <p>The final block we must specify is the <tt>INITIAL</tt>
+    block. This block is used to set the state variables
+    <tt>r</tt>, <tt>d</tt> and <tt>s</tt> to to their initial
+    values. Usually these are the values of the state variables at
+    equilibrium. The <tt>INITIAL</tt> block first calls the
+    procedure <tt>settables</tt> with the present voltage to
+    calculate the values of the alpha and beta functions. These in
+    turn are then used to calculate the initial state variables.
+    The <tt>INITIAL</tt> block is:</p>
+<pre class="nmodl">INITIAL {
+    settables(v)
+    r = ralpha/(ralpha+rbeta)
+    s = (salpha*(dbeta+dalpha) - (salpha*dbeta))/
+              ((salpha+sbeta)*(dalpha+dbeta) - (salpha*dbeta))
+    d = (dbeta*(salpha+sbeta) - (salpha*dbeta))/
+              ((salpha+sbeta)*(dalpha+dbeta) - (salpha*dbeta))
+}
+</pre>
+
+    <p>Note the values for <tt>r</tt>, <tt>d</tt> and <tt>s</tt>
+    are derived from the differential equations at equilibrium.</p>
+
+    <h2>Putting it all together</h2>
+
+    <p>The final and complete <i class="name">NMODL</i>
+    specification for the low threshold calcium T-type channel is
+    given in the file <var>CaT.mod</var> and is listed below.</p>
+<pre class="nmodl">TITLE Calcium T channel for Subthalamic Nucleus
+
+UNITS {
+    (mV) = (millivolt)
+    (mA) = (milliamp)
+}
+
+NEURON {
+    SUFFIX CaT
+    USEION ca READ eca WRITE ica
+    RANGE gmax
+}
+
+PARAMETER {
+    gmax  = 0.002 (mho/cm2)
+}
+
+ASSIGNED { 
+    v (mV)
+    eca (mV)
+    ica (mA/cm2)
+    ralpha (/ms)
+    rbeta (/ms)
+    salpha (/ms)
+    sbeta (/ms)
+    dalpha (/ms)
+    dbeta (/ms)
+}
+
+STATE {
+    r s d
+}
+
+BREAKPOINT {
+    SOLVE states METHOD cnexp
+    ica  = gmax*r*r*r*s*(v-eca)
+}
+
+INITIAL {
+    settables(v)
+    r = ralpha/(ralpha+rbeta)
+    s = (salpha*(dbeta+dalpha) - (salpha*dbeta))/
+              ((salpha+sbeta)*(dalpha+dbeta) - (salpha*dbeta))
+    d = (dbeta*(salpha+sbeta) - (salpha*dbeta))/
+              ((salpha+sbeta)*(dalpha+dbeta) - (salpha*dbeta))
+}
+
+DERIVATIVE states {  
+    settables(v)      
+    r' = ((ralpha*(1-r)) - (rbeta*r))
+    d' = ((dbeta*(1-s-d)) - (dalpha*d))
+    s' = ((salpha*(1-s-d)) - (sbeta*s))
+}
+
+UNITSOFF
+
+PROCEDURE settables(v (mV)) {
+    LOCAL  bd
+    TABLE ralpha, rbeta, salpha, sbeta, dalpha, dbeta 
+          FROM -100 TO 100 WITH 200
+
+    ralpha = 1.0/(1.7+exp(-(v+28.2)/13.5))
+    rbeta  = exp(-(v+63.0)/7.8)/(exp(-(v+28.8)/13.1)+1.7)
+
+    salpha = exp(-(v+160.3)/17.8)
+    sbeta  = (sqrt(0.25+exp((v+83.5)/6.3))-0.5) * 
+                     (exp(-(v+160.3)/17.8))
+
+    bd     = sqrt(0.25+exp((v+83.5)/6.3))
+    dalpha = (1.0+exp((v+37.4)/30.0))/(240.0*(0.5+bd))
+    dbeta  = (bd-0.5)*dalpha
+}
+
+UNITSON
+</pre>
+
+    <p>One final note, you may notice the commands <tt>UNITSON</tt>
+    and <tt>UNITSOFF</tt> in the file. These activate the units
+    checking (e.g. mV, mA etc.) and deactivate it respectively.</p>
+    <h2><a name="NMODL"></a>NMODL and NEURON</h2>
+    <p>A membrane mechanism description using <i class="name">NMODL</i> is laid
+      out in a text file. The <i class="name">NEURON</i> interpreter cannot read
+      this file directly as it can with <i class="name">hoc</i> files. Instead,
+      the <i class="name">NMODL</i> file has to be <i>compiled</i> into a form
+      that <i class="name">NEURON</i> can use. Suppose that we have created a
+      file <var>CaT.mod</var> containing our description of the T-type calcium
+      channel in <i class="name">NMODL</i>. How you incorporate this new mechanism
+      into <i class="name">NEURON</i> depends on what operating system you are
+      using.</p>
+    <dl>
+      <dt>UNIX or LINUX users:</dt>
+      <dd> UNIX and LINUX users should just change to the directory that contains
+        the <var>CaT.mod</var> file, and there type the command
+            <pre class="sys">nrnivmodl
+        </pre>
+    at the operating system prompt. Under Linux on a PC with an Intel-compatible
+    CPU, this creates a new <i class="name">NEURON</i> executable called i386/special
+    (the i386 subdirectory will be created automatically if it does not already
+    exist) whose library of mechanisms includes our T current. To launch this
+    new executable and have it load your model file, just type
+            <pre class="sys">nrngui sthD.hoc 
+        </pre>
+    at the OS prompt in the directory that contains i386. <var>sthD.hoc</var> is
+    the file that contains our model specification, and it is nearly identical
+    to <var>sthC3.hoc</var> from tutorial part C. </dd>
+      <dt>MSWin users:</dt>
+      <dd> MSWin users should just launch
+          <pre class="sys"> Start / Programs / Neuron / mknrndll
+      </pre>
+    This brings up a directory browser that can be used to navigate to the directory
+    that contains the <var>CaT.mod</var> file. When you get to the proper directory,
+    click on the button labelled "Make nrnmech.dll". This compiles all the mod
+    files in this directory and creates a file called nrnmech.dll that contains
+    the new compiled mechanisms. nrnmech.dll will be automatically loaded when
+    you double click on a <i class="name">hoc</i> file in this directory. </dd>
+      <dt>MacOS users:</dt>
+      <dd>MacOS users only need to drag the directory that contains <var>CaT.mod</var> and
+        drop it onto the mknrndll icon. This produces a nrnmech.dll file that
+        is automatically loaded when you double click on any <i class="name">hoc</i> file
+        in the same directory.</dd>
+    </dl>
+    <p>Note, <var>sthD.hoc</var> differs from <var>sthC3.hoc</var> from tutorial <a href="http://www.anc.ed.ac.uk/school/neuron/tutorial/tutC.html">part
+        C</a> in that our soma definition in the template now inserts our newly
+        defined CaT membrane mechanism:</p>
+    <pre class="hoc">    soma {
+      nseg = 1
+      diam = 18.8
+      L = 18.8
+      Ra = 123.0
+      insert hh
+      gnabar_hh=0.25
+      gl_hh = .0001666
+      el_hh = -60.0
+      insert CaT
+    }
+    </pre>
+    <p>Why do we have to go through this cumbersome procedure every time we want
+      to create or modify a channel? The reason is that membrane mechanisms are
+      used on every time step, and therefore need to be efficient. Converting
+      the NMODL file to C-code and then compiling this into a new <i class="name">NEURON</i> program
+      or library (which is what <tt>nrnivmodl</tt> and <tt>mknrndll</tt> do)
+      leads to more efficient simulation.</p>
+    <p>&nbsp;</p>
+    <p>Now if we inject a hyperpolarising current in one of our
+    neurons, we now observe a post-hyperpolarising T-type
+    response:</p>
+
+    <center>
+      <img alt="T channel simulation" src="tutD_files/Tresponse1.gif" align="middle" border="0" height="247" hspace="10" width="340">
+    </center>
+
+    <p>With current injections at -0.1, -0.2, and -0.3 nA.</p>
+
+    <p><b>Note:</b> The action potential is unrealistic for
+    mammalian subthalamic cells (it is still based on our HH squid
+    axon channels). We leave it to the reader to go on and develop
+    channels to underlie an action potential more characteristic of
+    the mammalian subthalamic projection neuron.</p>
+
+<p>In <a href="http://www.anc.ed.ac.uk/school/neuron/tutorial/tutE.html">part E</a> of this tutorial, we will
+   look at ways of getting data out of neuron, and methods of speeding
+      up simulations.</p>
+
+    <h2>References</h2>
+
+    <p class="ref">Hines, M. L. and Carnevale, N. T. (2000)
+    "Expanding NEURON's repertoire of mechanisms with NMODL"
+    <em>Neural Computation</em> <b>12</b>: 839-851</p>
+
+    <p class="ref">Johnston, D. and Wu, S. (1995) <em>Foundations
+    of Cellular Neurophysiology</em>. MIT Press, Cambridge,
+    Massachusetts.</p>
+
+    <p class="ref">Wang, X., Rinzel, J. and Rogawski, M. (1992) "A
+    model of the T--type calcium current and the low threshold
+    spike in thalamic neurons". <em>J. Neurophys</em>.
+    <b>66</b>: 839-850</p>
+    <hr>
+
+    <address>
+      Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+       David Sterratt (dcs@anc.ed.ac.uk)<br>
+       with the assistance of Ted Carnevale and Michael Hines<br>
+        Last modified on 
+      21 January 2004 at 11:39
+    </address>
+    <!--  LocalWords:  HTML css al Ca NMODL NEURON's Hines Ted Carnevale CaT Wu
+                 -->
+    <!--  LocalWords:  NMDOL nrnivmodl Pentium sthCaT nrn sthC nseg diam Ra hh gl
+                 -->
+    <!--  LocalWords:  gnabar mA li USEION vars var na ca eca ica gmax GUI mho cm
+                 -->
+    <!--  LocalWords:  ralpha rbeta salpha sbeta dalpha dbeta tr td settables bd
+                 -->
+    <!--  LocalWords:  exp funcs UNITSOFF UNITSON sth Gillies nrngui sthD MSWin
+                 -->
+    <!--  LocalWords:  mknrndll nrnmech dll MacOS Johnston ena ek SThcell nA Rinzel
+             -->
+    <!--  LocalWords:  Rogawski Neurophys cai cao mM
+             -->
+  <!-- InstanceEndEditable --></td>
+  </tr>
+  <tr>
+    <td colspan="2"><!-- #BeginLibraryItem "/Library/creditsNEURONtutorial.lbi" -->
+    <style type="text/css">
+<!--
+.style3 {
+	font-family: "Times New Roman", Times, serif;
+	font-size: x-small;
+}
+-->
+    </style>
+    <link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+    <h3>Acknowledgements</h3>
+    <p class="extra">Last modified on 10/29/04 by<br>
+  Albert Borroni, CS/Neuoriscience Oberlin College (aborroni@oberlin.edu)</p>
+    <p><span class="extra">based on tutorial written by <br>
+  Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+  David Sterratt (dcs@anc.ed.ac.uk)<br>
+  which is originally based on the tutorials by Kevin E. Martin<br>
+  with the assistance of Ted Carnevale and Michael Hines<br>
+      </span> <span class="style3">
+      
+      </span>
+      25 February 2010 at 16:17
+    </p>
+    <!-- #EndLibraryItem --></td>
+  </tr>
+</table>
+</body>
+<!-- InstanceEnd --></html>

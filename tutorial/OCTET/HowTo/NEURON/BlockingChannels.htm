@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/HowTo.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Untitled Document</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+<link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<table width="100%" height="260"  border="0" cellpadding="1" cellspacing="2">
+  <tr>
+    <td width="100" height="1"><img src="../../images/spacer.gif" width="100" height="1"></td>
+    <td height="1"></td>
+  </tr>
+  <tr valign="top">
+    <td width="100"><a href="index.html">Home</a></td>
+    <td></td>
+  </tr>
+  <tr valign="top">
+    <td width="100" height="111"><p><a href="A1_MyFirstNeuon.html" alt = "creating a soma ">A.1</a><br>
+        <a href="A2_GUI.htm">A.2</a><br>
+        <a href="A3_CreateDendrites.html">A.3</a></p>
+    <p><a href="B1_RealismChannels.htm">B.1</a><br>
+      <a href="B2_RealisticMorph.html">B.2</a></p>
+    <p><a href="C1_Templates.html">C.1</a><br>
+      <a href="C2_ConnectingMultiple.html">C.2</a><br>
+      <a href="C3_ViewingMultipleNeurons.htm">C.3
+      </a></p>
+    <p><a href="D1_NMODL.html">D.1</a></p>
+    <p><a href="ColllectDataVectors.html">E.1</a><br>
+      <a href="Speed.htm">E.2</a><br>
+      <a href="PrintingWindows.htm">E.3</a><br>
+      <a href="Sessions.htm">E.4</a><br>
+      E.5<br>
+      <a href="BlockingChannels.htm">E.6</a><br>
+    </p>
+    <p><a href="Commands.htm">Basic <br>
+      Commands</a></p>
+    <p>Manual</p>
+    <p>&nbsp;</p></td>
+  <td><!-- InstanceBeginEditable name="Content" -->
+<h2><a name="proc">Simulating blocking channels: procedures</a></h2>
+<p>Suppose we would like to simulate the effects of blocking sodium channels
+  in the soma. We could simply type:</p>
+<p class="hoc"> soma gnabar_hh = 0 </p>
+<p>to effectively block the sodium channels. To unblock the channels, we could
+  type:</p>
+<p class="hoc"> soma gnabar_hh = 0.25 </p>
+<p>However, it would be nice if we could say something like "block sodium" or "unblock
+  sodium". <em>Procedures</em> allow us to do this. A procedure is a block of
+  code that we will probably want to use more than once. The syntax for defining
+  a procedure is:</p>
+<p><tt class="hoc">proc</tt> <i>procedure_name()</i> <tt class=
+    "hoc">{</tt><br>
+    <i>code...</i><br>
+    <tt class="hoc">}</tt></p>
+<p>Once we have defined a procedure, we can execute it using <tt class="hoc">procedure_name()</tt>.</p>
+<p>For the example of blocking sodium channels, we can define a procedure called <tt class="hoc">block_sodium()</tt> like
+  this:</p>
+<p class="do-hoc"> proc block_sodium() { soma gnabar_hh = 0 } </p>
+<p>Then we can use</p>
+<p class="do-hoc"> block_sodium() </p>
+<p>to block the sodium channels. Check that this works by rerunning the simulation
+  after blocking sodium and looking at the same graphs as in the previous section.</p>
+<p>Similarly, we can define <tt class=
+    "hoc">unblock_sodium()</tt>:</p>
+<p class="do-hoc"> proc unblock_sodium() { soma gnabar_hh = 0.25 } </p>
+<p>Suppose we would like to see the effect of a partial block on sodium. (For
+  example, TTX blocks sodium channels to varying degrees of their normal strength.)
+  Giving <em>arguments</em> to procedures is a convenient way to change the level
+  of blocking. To do this we modify <tt class="hoc">block_sodium()</tt> as follows:</p>
+<p class="do-hoc"> proc block_sodium() { soma gnabar_hh = $1 * 0.25 } </p>
+<p>The <tt>$1</tt> refers to the first argument of the procedure. We pass argument
+  to the the procedure as follows:</p>
+<p class="do-hoc"> block_sodium(0.15) </p>
+<p>This will block the sodium channels to 15% of their normal value.</p>
+<p>We can pass more than one argument to the procedure by using <tt>$2</tt>, <tt>$3</tt> etc.
+  (i.e. <tt>$1</tt> is the first parameter, <tt>$2</tt> is the second if there
+  is one, <tt>$3</tt> the third, if there is one, etc.). For example:</p>
+<p class="hoc"> proc block_sodium_potassium() { soma gnabar_hh = $1 * 0.25 soma
+  gkbar_hh = $2 * 0.036 } </p>
+<p>will block sodium potassium channels to varying degrees when called with</p>
+<p class="hoc"> block_sodium_potassium(0.15, 0.25) </p>
+<p>We can make long procedures clearer by assigning <tt>$1</tt> etc. to meaningful
+  variable names at the start of the procedure. For example:</p>
+<p class="hoc"> proc block_sodium() { block_fraction = $1 soma gnabar_hh = block_fraction
+  * 0.25 } </p>
+<p>is clearer than the previous version. However, the disadvantage with this
+  is that the variable <tt>block_fraction</tt> is left hanging around after we've
+  finished executing the procedure. This is messy and takes up memory. Instead
+  we can use the <tt class="hoc">local</tt> statement so that the variable <tt>block_fraction</tt> as
+  used in the procedure is only defined and available in this procedure:</p>
+<p class="hoc"> proc block_sodium() { local block_fraction block_fraction = $1
+  soma gnabar_hh = block_fraction * 0.25 } </p>
+<p>It is good programming practice to use local variables</p>
+<h2>&nbsp;</h2>
+<!-- InstanceEndEditable --></td>
+  </tr>
+  <tr>
+    <td colspan="2"><!-- #BeginLibraryItem "/Library/creditsNEURONtutorial.lbi" -->
+    <style type="text/css">
+<!--
+.style3 {
+	font-family: "Times New Roman", Times, serif;
+	font-size: x-small;
+}
+-->
+    </style>
+    <link href="../../CSS/main.css" rel="stylesheet" type="text/css">
+    <h3>Acknowledgements</h3>
+    <p class="extra">Last modified on 10/29/04 by<br>
+  Albert Borroni, CS/Neuoriscience Oberlin College (aborroni@oberlin.edu)</p>
+    <p><span class="extra">based on tutorial written by <br>
+  Andrew Gillies (andrew@anc.ed.ac.uk)<br>
+  David Sterratt (dcs@anc.ed.ac.uk)<br>
+  which is originally based on the tutorials by Kevin E. Martin<br>
+  with the assistance of Ted Carnevale and Michael Hines<br>
+      </span> <span class="style3">
+      
+      </span>
+      25 February 2010 at 16:17
+    </p>
+    <!-- #EndLibraryItem --></td>
+  </tr>
+</table>
+</body>
+<!-- InstanceEnd --></html>
