@@ -27,7 +27,7 @@ soma electrode = new IClamp(0.5)
 
 soma electrode.del = 100
 soma electrode.dur = 100
-soma electrode.amp = 0.5 //note this is higher than in previous section
+soma electrode.amp = 0.2 //note this is higher than in previous section
 
 print soma.v
 dt = 0.025
