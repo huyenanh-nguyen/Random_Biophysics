@@ -1,0 +1,39 @@
+load_file("nrngui.hoc")
+ndend = 2
+create soma, dend[ndend]
+access soma
+
+//Define membrane mechanisms
+soma nseg=1
+soma diam=18.8
+soma L = 18.8
+soma Ra=100.0
+
+insert hh
+gnabar_hh= 0.2
+gl_hh = . 00005
+el_hh = -65.0
+insert pa
+
+
+dend[0] { nseg = 5 diam = 3.18 L = 701.9 Ra = 100}
+dend[1] { nseg = 5 diam = 2.0 L = 549.1 Ra = 100 }
+
+for i = 0, ndend-1 dend[i] { insert pas g_pas = .00005 e_pas = -65.0 }
+
+// Connect things together
+connect dend[0](0), soma(0)
+connect dend[1](0), soma(1)
+
+// create an electrode in the soma
+objectvar stim
+stim = new IClamp(0.5)
+stim.del = 100
+stim.dur = 100
+stim.amp = 0.45
+
+print soma.v
+
+forall psection()
+
+tstop = 300

@@ -1,0 +1,21 @@
+create soma
+access soma
+
+soma nseg = 1
+soma diam = 18.8
+soma L = 18.8
+soma Ra = 100.0
+
+soma insert hh
+soma insert pas
+
+objref electrode
+electrode = new IClamp(0.5)
+electrode.del = 100
+electrode.dur = 100
+electrode.amp = 0.45
+
+tstop = 300
+
+run()
+print soma.v
