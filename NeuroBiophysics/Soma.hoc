@@ -1,0 +1,54 @@
+
+ndend = 2
+create soma, dend[ndend]
+access soma
+
+soma nseg=1
+soma diam=18.8
+soma L = 18.8
+soma Ra=100.0
+
+insert hh
+soma gnabar_hh = 0.25
+insert pas
+
+
+dend[0] { nseg = 5 diam = 3.18 L = 701.9 Ra = 100 insert pas }
+dend[1] { nseg = 5 diam = 2.0 L = 549.1 Ra = 100 insert pas }
+
+// Connect things together
+connect dend[0](0), soma(0)
+connect dend[1](0), soma(1)
+
+// create an electrode in the soma
+objectvar electrode
+
+soma electrode = new IClamp(0.5)
+
+soma electrode.del = 100
+soma electrode.dur = 100
+soma electrode.amp = 0.5 //note this is higher than in previous section
+
+print soma.v
+dt = 0.025
+tstop = 300
+v_init = -65
+
+// Create vectors to record data
+objref vsoma, vdend, tvec, g
+vsoma = new Vector()
+vdend = new Vector()
+tvec  = new Vector()
+
+vsoma.record(&soma.v(0.5))
+vdend.record(&dend[0].v(0.1))
+tvec.record(&t)
+
+run()
+
+g = new Graph()
+g.size(0, tstop, -80, 40)
+g.addvar("soma.v(0.5)", &soma.v(0.5), 1, 2)      // rot
+g.addvar("dend[0].v(0.1)", &dend[0].v(0.1), 2, 2) // blau
+vsoma.plot(g, tvec)
+vdend.plot(g, tvec)
