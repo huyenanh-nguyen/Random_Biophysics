@@ -48,7 +48,5 @@ run()
 
 g = new Graph()
 g.size(0, tstop, -80, 40)
-g.addvar("soma.v(0.5)", &soma.v(0.5), 1, 2)      // rot
-g.addvar("dend[0].v(0.1)", &dend[0].v(0.1), 2, 2) // blau
 vsoma.plot(g, tvec)
 vdend.plot(g, tvec)
