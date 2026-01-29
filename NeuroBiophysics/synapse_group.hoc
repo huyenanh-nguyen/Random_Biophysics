@@ -1,0 +1,41 @@
+load_file("nrngui.hoc")
+
+create soma
+soma{
+    nseg = 1
+    insert pas
+    e_pas = -65
+    L = 30
+    diam = 30
+    Ra = 100
+}
+
+objref syn, stim, nc // create synapse, stimulus and net current
+
+soma syn = new Exp2Syn(0.5)
+syn.e = 0
+
+stim = new NetStim()
+stim.start = 100
+stim.interval = 5 // time between pulse (5 = 200Hz)
+stim.number = 10 // more than 1 is more stimuli with frequency -> integration possible if freq high enough
+stim.noise = 0
+
+nc = new NetCon(stim, syn, 0, 0, 0.001)
+
+tstop = 300
+
+objref vrec, trec // create objects to plot outside GUI
+
+trec = new Vector()
+trec.record(&t)
+
+vrec = new Vector()
+vrec.record(&soma.v(0.5)) // v only works when only one soma and segment rest spefifies
+
+run()
+
+objref vplot // create plot outside GUI
+vplot = new Graph()
+vplot.size(0, trec.max(), vrec.min(), vrec.max()) //axys size(start x, end x, start y, end y)
+vrec.line(vplot, trec, 1, 2) //plot vrec where, against what, thickness, color

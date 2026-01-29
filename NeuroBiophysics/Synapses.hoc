@@ -1,0 +1,79 @@
+load_file("nrngui.hoc")
+
+create soma, dend
+soma {
+    nseg = 1
+    insert pas
+    e_pas = -65
+    L = 30
+    diam = 30
+    Ra = 100
+}
+//set another segment, because standard is unrealistic, insert passive characteristics and more stuff
+
+dend {
+    nseg = 11
+    L = 1000
+    diam = 2
+    insert pas
+    g_pas = 0.0001
+    e_pas = -65
+}
+
+//create a dendrite  with this, which is quite big, especially long but still thin
+
+connect dend (0), soma(1)
+//connects end of dendrite  with uppert part of soma
+
+objref listSyn, listStim, listCon
+listSyn = new List()
+listStim = new List()
+listCon = new List()
+count = 0
+dend {
+    for(x,0) {
+        listSyn.append(new Exp2Syn(x))
+        listStim.append(new NetStim())
+        listStim.o(count).start = 100 + count * 50
+        listStim.o(count).number = 1
+        listCon.append(new NetCon(listStim.o(count), listSyn.o(count), 0, 0, 0.001))
+        count +=1
+    }
+}
+
+/*
+objref syn, stim, nc
+soma syn = new Exp2Syn(0.5)
+//new object which gives us the difference of the two exponential function (view lecture)
+syn.e = 0
+stim = new NetStim()
+//basically artificial neuron which fires whenever we want it to fire to test our neuron
+stim.start = 100
+stim.interval = 5
+stim.number = 1
+stim.noise = 0
+nc = new NetCon(stim, syn, 0, 0, 0.001)
+
+//equation: i = g * (v - e)
+*/
+
+tstop = 800
+
+objref vrec, trec 
+//just name it after voltage recording and time recording
+trec = new Vector()
+trec.record(&t)
+//records any variable that we want 
+vrec = new Vector()
+vrec.record(&soma.v(0.5))
+//specify where exactly it should record
+
+run()
+
+objref vplot
+vplot = new Graph()
+//possible way for scaling: vplot.size(0,tstop,-65, -60)    but better would be:
+vplot.size(0,trec.max(), vrec.min(), vrec.max)
+vrec.line(vplot, trec, 1, 2)
+
+

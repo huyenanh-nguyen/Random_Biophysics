@@ -1,0 +1,8 @@
+Traub.cpp: ../Traub.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "..";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Traub.mod"  -o "/Users/huyenanh/git_repos/Random_Biophysics/NeuroBiophysics/arm64" )
+
+./Traub.o: Traub.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/huyenanh/git_repos/Random_Biophysics/NeuroBiophysics/arm64/$<\\n"
+	$(CXXCOMPILE) -I".." $(INCLUDES) -fPIC -c "/Users/huyenanh/git_repos/Random_Biophysics/NeuroBiophysics/arm64/$<" -o $@
+

@@ -1,0 +1,6 @@
+load_file("Morphology_L5PC.hoc") 
+
+insert hh
+gnabar_hh= 0.2 // gnabar_hh = The maximum specific sodium channel conductance
+gl_hh = 0.00005 // gl_hh = The maximum specific leakage conductance
+el_hh = -65.0 // el_hh = The reversal potential for the leakage channel

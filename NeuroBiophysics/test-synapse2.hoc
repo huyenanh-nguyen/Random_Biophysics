@@ -1,0 +1,74 @@
+load_file("nrngui.hoc")
+
+create soma, dend
+
+soma {
+    nseg = 1
+    insert pas
+    e_pas = -65
+    L = 30
+    diam = 30
+    Ra = 100
+}
+
+
+dend {
+    nseg = 11
+    // layer 5 cell
+    L = 1000
+    diam = 2 
+    Ra = 100
+    insert pas
+    g_pas = 0.0001
+    e_pas = -65
+}
+
+//connect dendrite (bottom) to soma at 1 (end)
+connect dend(0), soma(1)
+
+
+
+objref listSyn, listStim, listCon
+
+listSyn = new List()
+listStim = new List()
+listCon = new List()
+
+count = 0
+
+dend {
+    for (x,0){
+        listSyn.append(new Exp2Syn(x))
+        listStim.append(new NetStim())
+        listStim.o(count).start = 100 + count * 50
+        listStim.o(count).number = 1
+        listCon.append(new NetCon(listStim.o(count), listSyn.o(count), 0, 0, 0.001))
+        count += 1
+
+    }
+}
+
+
+tstop = 800
+
+// Recording vectors: voltage and time
+objref vrec, trec
+
+trec = new Vector()
+
+trec.record(&t)
+
+vrec = new Vector()
+
+vrec.record(&soma.v(0.5))
+
+
+run()
+
+
+objref vplot
+vplot = new Graph()
+vplot.size(0, trec.max(), vrec.min(), vrec.max())
+
+
+vrec.line(vplot, trec, 1, 2)
