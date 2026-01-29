@@ -1,0 +1,179 @@
+/* 	
+
+	NEURON simulation practical. 
+	Albert Gidon  agidon20@gmail.com
+	30/01/2024 
+
+	Estimates time: 1 - 1.5 hours
+	**** Membrane time constant ****
+	--------------------------------
+	
+	In this exercise we will explore membrane time constant and the significance of 
+	membrane time constant as a time window for integration.
+
+	1. In this hoc file (below), write the hoc code that will do the following: 
+		a. Create a soma with length 100 and diameter 100 (it is unrealistically big soma so it represents also the dendrites)
+		b. Set membrane resistivity, Rm to 30 KOhm * cm2 (convert the units appropriately for NEURON)
+		c. Set membrane capacitance, cm to 1 uF/cm2
+		d. Explain, what is the difference between Rin and Rm (what are the units)
+			What is the difference between cm (specific membrane capacitance) and C (the neuron capacity)
+	
+	2. What is the membrane time constant? 
+		Calculate it directly from Rm and cm in #1. -> membrane time constant = Rm * cm = 30000 Ohm*cm2 * 0.000001 f/cm2 = 0.03 s
+		Write it down, make sure that you understand the units.
+
+	3. Inject 0.3 nA current pulse into the cell body (soma) for sufficient time such that the 
+		membrane will get to steady state.
+	
+	4. Adjust the simulation time (tstop) such that you clearly see the membrane return to 
+		its resting potential after the end of the current injection. Rerun the simulation 
+		if necessary. 
+	
+	5. What is the input resistance (Rin) of the cell? 
+		Guidance: in order to measure x,y  (v and t in our case) values on the graph:
+		a. Select cross-hair from the graph context menu
+		b. Click and hold on the cursor on the graph to select the trace value with the cross-hair.
+		c. Press enter and release the click.
+		d. The x,y values are now printed to screen.
+		e. Calculate Rin.
+		f. Question: Why do we need to plot an entire IV curve if we can, instead of 
+			calculating Rin from one current step? 
+	
+	6. What is C, the capacity of the cell(units of uF NOT units of uF/cm2)? 
+		Use the value of Rin you measured in Q5 and the time constant you 
+		calculated in #1 to calculate the cell capacity.
+	
+	7. How to measure the membrane time constant from an experimental trace:
+		Run the simulation again, find V at steady state during current injection.
+		Set a variable "v_max" to the value you measured (type "v_max = (your value here)" in the terminal).
+		Set a variable "v_inf" to the resting potential 
+		use the crosshair in the graph to check what is the time it takes to the membrane to reach 
+		1/e * (v_max - v_inf) + v_inf
+		after the end of the current pulse stimulation (1/e = 0.368).
+		
+		
+	8. In your hoc file. Comment out the soma you created and load instead our layer 5
+		morphology "Morphology_L5PC.hoc"
+		Insert only "pas" to all the compartments with Rm = 30 KΩ * cm2 
+	
+	9. Redo #7.
+		Which decay is faster, the isopotential neuron (single-compartment) or detailed morphology.
+		The two models have the same Rm and Cm, how can it be that they have different time constants? 
+		Hint, where does the current flow first, to the membrane or to the dendrite.
+		Call me if you have an answer.
+		
+	
+
+*/
+
+
+//single compartment neuron
+create soma_single
+
+access soma_single
+
+soma_single{
+	nseg=1
+    diam=100
+    L = 100
+    insert pas
+	//rm = 30000
+	g_pas = 1/30000 //membrane resistivity -> g = 1 / Rm
+	e_pas = -65
+	cm = 1.0 //membrane capacitance
+}
+
+objref stim_single
+soma_single stim_single = new IClamp(0.5)
+stim_single.del = 100
+stim_single.dur = 400
+stim_single.amp = 0.3
+
+objref tvec, vvec_single, vvec_morph
+tvec = new Vector()
+vvec_single = new Vector()
+vvec_morph = new Vector()
+
+tvec.record(&t)
+vvec_single.record(&soma_single.v(0.5))
+
+// morphological neuron
+load_file("Morphology_L5PC.hoc")
+
+forall{
+    insert pas
+    g_pas = 1/30000
+    e_pas = -65.0
+}
+
+//current injection
+objref stim
+soma stim = new IClamp(0.5)
+stim.del = 100     // ms
+stim.dur = 400    // ms
+stim.amp = 0.3   // nA 
+
+
+objref tvec, vvec
+tvec = new Vector()
+vvec = new Vector()
+
+tvec.record(&t)
+vvec.record(&soma.v(0.5))
+
+objref g
+g = new Graph()
+g.size(0, 800, -80, 40)
+g.addvar("soma_morph", &soma.v(0.5), 1,1)       // black
+g.addvar("soma_single", &soma_single.v(0.5), 3, 1)	// blue
+graphList[0].append(g)
+
+// init
+v_init = -65
+tstop = 800
+dt = 0.025
+
+finitialize(v_init)
+
+v_max = -36.35
+v_inf = -65
+v_1e = v_inf + 0.368 * (v_max - v_inf)
+print v_1e
+
+run()
+
+
+
+/*
+1.	difference between Rin and Rm:
+	**Rm – Specific membrane resistance**  
+	- Definition: Electrical resistance of the membrane per unit area  
+	- Units: Ω·cm²  
+
+	**Rin – Input resistance**  
+	- Definition: Effective resistance measured at the soma during current injection  
+	- Units: Ω (commonly MΩ)  
+
+	**cm – Specific membrane capacitance**  
+	- Definition: Capacitance of the membrane per unit area  
+	- Units: µF/cm²  
+
+	**C – Total membrane capacitance**  
+	- Definition: Total electrical capacitance of the neuron  
+	- Units: µF  
+
+2.	membrane time constant  ​τm = Rm * cm = 30000 Ohm*cm2 * 0.000001 f/cm2 = 0.03 s = 30ms
+
+5. Rin = ∆V/∆I = (-36.35 - (-65)) / 0.3 * 10-9 =  95.5 MΩ (∆V read from the y-plot (steady state) - resting Voltage e_pas and ∆I is 0.3 nA)
+
+6. Capacity C = ​τm​ / ​Rin = 30ms / 95.5 MΩ = 0.31*10^-9 F = 0.31 nF
+
+7.	v_1e = v_inf + 0.368 * (v_max - v_inf) = -54.4568 mV
+
+8.	v_max is now at ~-40mV
+
+9.	Morphology_L5PC - neuron decays faster than the single compartment neuron.
+	Adding dendrites reduces the effective input resistance, which makes the 
+	voltage decay faster, even if the specific membrane capacitance cm is unchanged
+
+*/
