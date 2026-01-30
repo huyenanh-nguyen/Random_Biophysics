@@ -1,0 +1,58 @@
+load_file("Morphology_L5PC.hoc")
+
+forall{
+    Ra = 100
+    insert pas
+    g_pas = 1/16590 // g_pas = tm [s] / cm[F/cm² ]
+    e_pas = -65.0
+    cm = 1.65
+}
+
+
+// Synapse
+objref syn, stim_, nc
+soma syn = new Exp2Syn(0.5)
+
+stim_ = new NetStim()
+stim_.start = 200
+stim_.number = 1
+
+nc =  new NetCon(stim_, syn, 3,2,0.01)
+//nc.weight = 0.01
+
+objref tvec, vvec, gmax_vec, EPSPpeak
+tvec = new Vector()
+vvec = new Vector()
+gmax_vec = new Vector()
+EPSPpeak = new Vector()
+
+vvec.record(&soma.v(0.5))
+
+tvec.record(&t)
+vvec.record(&soma.v(0.5))
+
+// init
+v_init = -65
+tstop = 800
+dt = 0.025
+
+for i=1,10 {      // gmax von 1 bis 10 nS
+    nc.weight = i * 0.001
+    vvec.resize(0) // emptying vector for new simulation
+    finitialize(v_init)
+    run()
+
+
+    EPSPpeak.append(vvec.max() - v_init)
+    gmax_vec.append(i)
+}
+
+objref g_io
+g_io = new Graph()
+g_io.size(0, 10, 0, EPSPpeak.max()*1.2)   // x: gmax (nS), y: EPSP (mV)
+
+EPSPpeak.line(g_io, gmax_vec, 2, 1)    // blue line
+
+
+
+run()
