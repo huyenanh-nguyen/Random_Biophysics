@@ -1,0 +1,74 @@
+load_file("Morphology_L5PC.hoc")
+
+forall{
+    Ra = 100
+    insert pas
+    g_pas = 1/16590 // g_pas = tm [s] / cm[F/cm² ]
+    e_pas = -65.0
+    cm = 1.65
+}
+
+
+objref nclist
+nclist = new List() 
+
+objref listSyn, listStim, listCon
+
+listSyn = new List()
+listStim = new List()
+listCon = new List()
+count = 0
+
+objref syn, stim_, nc
+
+soma syn = new Exp2Syn(0.5) // EPSP on target cell
+syn.e = 0
+stim_ = new NetStim()
+stim_.start = 200
+stim_.number = 1
+
+nc = new NetCon(stim_, syn)
+nc.weight = 0.01
+
+objref ipsyn, stim, inc
+apic[71] ipsyn = new Exp2Syn(0.5)
+ipsyn.e = -80    // inhibitory reversal potential, z.B. Cl-
+ipsyn.tau1 = 0.5
+ipsyn.tau2 = 5
+
+stim = new NetStim()
+stim.start = 200
+stim.number = 1
+stim.noise = 0
+inc = new NetCon(stim, ipsyn)
+inc.weight = 0.02
+
+objref vsoma, vapic, vtarget, tvec // recording voltage
+vsoma = new Vector()
+vapic = new Vector()
+vtarget = new Vector()
+tvec = new Vector()
+
+vsoma.record(&soma.v(0.5))
+//vapic.record(&apic[11].v(0.5))
+//vtarget.record(&target_cell.v(0.5))
+tvec.record(&t)
+
+
+
+objref g
+g = new Graph()
+g.size(0, 500, -80, 40)
+g.addvar("EPSP soma", &soma.v(0.5), 1,1)       // black
+g.addvar("IPSP apic[71]", &apic[71].v(0.5), 2,1) // red
+g.addvar("apic[17]", &apic[71].v(0.5), 5,1) // yellow
+//g.addvar("target_cell", &target_cell.v(0.5), 3,1) // blue
+graphList[0].append(g)
+
+
+dt = 0.025
+tstop = 500
+v_init = -65
+finitialize(v_init)
+
+run()

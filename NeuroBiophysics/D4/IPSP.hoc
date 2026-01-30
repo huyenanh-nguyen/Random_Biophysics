@@ -1,0 +1,47 @@
+load_file("Morphology_L5PC.hoc")
+
+forall{
+    Ra = 100
+    insert pas
+    g_pas = 1/16590 // g_pas = tm [s] / cm[F/cm² ]
+    e_pas = -65.0
+    cm = 1.65
+}
+
+objref tvec, vvec
+tvec = new Vector()
+vvec = new Vector()
+
+vvec.record(&soma.v(0.5))
+
+// Synapse
+objref ipsyn, stim, nc
+soma ipsyn = new Exp2Syn(0.5)
+ipsyn.e = -75    // inhibitory reversal potential, z.B. Cl-
+ipsyn.tau1 = 0.5
+ipsyn.tau2 = 5
+
+stim = new NetStim()
+stim.start = 200
+stim.number = 1
+stim.noise = 0
+
+
+nc =  new NetCon(stim, ipsyn, 3,2,0.01)
+//nc.weight = 0.01
+
+tvec.record(&t)
+vvec.record(&soma.v(0.5))
+
+objref g
+g = new Graph()
+g.size(0, 800, -70, -60)
+g.addvar("soma_syn_IPSP", &soma.v(0.5), 1,1)       // black
+graphList[0].append(g)
+
+// init
+v_init = -65
+tstop = 800
+dt = 0.025
+
+run()
