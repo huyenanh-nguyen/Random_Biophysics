@@ -29,9 +29,9 @@ stim_.number = 1
 
 nc = new NetCon(stim_, syn)
 nc.weight = 0.01
-
+/*
 objref ipsyn, stim, inc
-apic[71] ipsyn = new Exp2Syn(0.5)
+//dend[3] ipsyn = new Exp2Syn(0.5)
 ipsyn.e = -80    // inhibitory reversal potential, z.B. Cl-
 ipsyn.tau1 = 0.5
 ipsyn.tau2 = 5
@@ -42,12 +42,13 @@ stim.number = 1
 stim.noise = 0
 inc = new NetCon(stim, ipsyn)
 inc.weight = 0.02
-
+*/
 objref vsoma, vapic, vtarget, tvec // recording voltage
 vsoma = new Vector()
 vapic = new Vector()
 vtarget = new Vector()
 tvec = new Vector()
+
 
 vsoma.record(&soma.v(0.5))
 //vapic.record(&apic[11].v(0.5))
@@ -58,13 +59,12 @@ tvec.record(&t)
 
 objref g
 g = new Graph()
-g.size(0, 500, -80, 40)
+g.size(0, 500, -80, -20)
 g.addvar("EPSP soma", &soma.v(0.5), 1,1)       // black
-g.addvar("IPSP apic[71]", &apic[71].v(0.5), 2,1) // red
-g.addvar("apic[17]", &apic[71].v(0.5), 5,1) // yellow
+g.addvar("IPSP dend[3]", &dend[3].v(0.5), 2,1) // red
+g.addvar("soma", &soma.v(0.5), 5,1) // yellow
 //g.addvar("target_cell", &target_cell.v(0.5), 3,1) // blue
 graphList[0].append(g)
-
 
 dt = 0.025
 tstop = 500
