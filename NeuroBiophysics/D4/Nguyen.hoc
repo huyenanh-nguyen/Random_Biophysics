@@ -1,0 +1,70 @@
+load_file("Morphology_L5PC.hoc")
+
+forall{
+    Ra = 100
+    insert pas
+    g_pas = 1/16590 // g_pas = tm [s] / cm[F/cm² ]
+    e_pas = -65.0
+    cm = 1.65
+}
+
+//current injection
+objref stim
+soma stim = new IClamp(0.5)
+stim.del = 100     // ms
+stim.dur = 500    // ms
+stim.amp = 0.3   // nA 
+
+objref tvec, vvec
+tvec = new Vector()
+vvec = new Vector()
+
+tvec.record(&t)
+vvec.record(&soma.v(0.5))
+
+objref g
+g = new Graph()
+g.size(0, 800, -80, 40)
+g.addvar("soma_syn_EPSP", &soma.v(0.5), 1,1)       // black
+graphList[0].append(g)
+
+// init
+v_init = -65
+tstop = 800
+dt = 0.025
+
+
+
+proc compute_tau() {local i, t_end, tau, v_now
+
+    // time when current injection ends
+    t_end = stim.del + stim.dur
+
+    // find index right after current ends
+    for i = 0, tvec.size()-1 {
+        if (tvec.x(i) >= t_end) break
+    }
+
+    // search for when voltage crosses V(1/e)
+    for (; i < tvec.size(); i += 1) {
+        v_now = vvec.x(i)
+        if (v_now <= v_1e) {
+            tau = tvec.x(i) - t_end
+            print "Morphological Neuron Membrane time constant tau τm =", tau, "ms"
+            return
+        }
+    }
+
+    print "Tau not found — increase tstop"
+}
+
+run()
+
+v_max = vvec.max()
+v_inf = -65
+v_1e = v_inf + 0.368 * (v_max - v_inf)
+
+Rin = (vvec.max() - e_pas) / stim.amp
+print "input resistanc Rin =  ", Rin, "Ω"
+
+compute_tau()
