@@ -29,7 +29,7 @@ stim_.number = 1
 
 nc = new NetCon(stim_, syn)
 nc.weight = 0.01
-/*
+
 objref ipsyn, stim, inc
 //dend[3] ipsyn = new Exp2Syn(0.5)
 ipsyn.e = -80    // inhibitory reversal potential, z.B. Cl-
@@ -42,7 +42,7 @@ stim.number = 1
 stim.noise = 0
 inc = new NetCon(stim, ipsyn)
 inc.weight = 0.02
-*/
+
 objref vsoma, vapic, vtarget, tvec // recording voltage
 vsoma = new Vector()
 vapic = new Vector()

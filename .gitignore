@@ -4,8 +4,10 @@ __pycache__/
 *$py.class
 /nrn
 nrn/
-
-
+/aligator3
+./aligator3
+.aligator3
+aligator3/
 
 # C extensions
 *.so
